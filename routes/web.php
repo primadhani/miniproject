@@ -40,30 +40,25 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
         return view('admin.dashboard');
     })->name('dashboard');
     
-    // Users Management
-    Route::get('/users', function () {
-        return view('admin.users');
-    })->name('users');
+    Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users');
     
-    // Academy Management
-    Route::get('/academy', function () {
-        return view('admin.academy');
-    })->name('academy');
+    // Rute untuk menampilkan form edit
+    Route::get('/users/{user}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
     
-    // Challenge Management
-    Route::get('/challenge', function () {
-        return view('admin.challenge');
-    })->name('challenge');
+    // Rute untuk memproses update data
+    Route::put('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
     
-    // Event Management
-    Route::get('/event', function () {
-        return view('admin.event');
-    })->name('event');
+    // Rute untuk menghapus data
+    Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroy');
     
-    // Job Management
-    Route::get('/job', function () {
-        return view('admin.job');
-    })->name('job');
+    Route::get('/learning-path', function () {
+        return view('admin.learning-path');
+    })->name('learning-path');
+
+    Route::get('/materi', function () {
+        return view('admin.materi');
+    })->name('materi');
+
 });
 
 require __DIR__.'/auth.php';
