@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers; // <-- Namespace diubah menjadi langsung App\Http\Controllers
+namespace App\Http\Controllers; 
 
 use App\Models\LearningPath;
 use App\Models\Materi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller; // <-- Pastikan ini ada jika belum ada
+use App\Http\Controllers\Controller; 
 
-class LearningPathController extends Controller // <-- Nama kelas tetap, namun tidak lagi di bawah Admin
+class LearningPathController extends Controller
 {
     // READ: Menampilkan daftar Learning Path
     public function index()
@@ -39,11 +39,10 @@ class LearningPathController extends Controller // <-- Nama kelas tetap, namun t
     // SHOW: Menampilkan detail Learning Path dan form untuk menambah Materi
     public function show(LearningPath $learningPath)
     {
-        // Muat materi yang sudah terhubung dengan path ini, diurutkan berdasarkan urutan pivot
-        $pathMateris = $learningPath->materis; 
+        // PENTING: Muat materi yang sudah terhubung dengan path ini, diurutkan berdasarkan urutan pivot
+        $pathMateris = $learningPath->materis()->orderBy('urutan')->get(); 
         
         // Ambil semua materi yang BELUM terhubung dengan path ini (untuk opsi add)
-        // Gunakan id_materi karena itu adalah primary key dari model Materi Anda
         $existingMaterisIds = $pathMateris->pluck('id_materi')->toArray();
         $availableMateris = Materi::whereNotIn('id_materi', $existingMaterisIds)->get();
 
@@ -109,4 +108,37 @@ class LearningPathController extends Controller // <-- Nama kelas tetap, namun t
         $learningPath->materis()->detach($materi->id_materi);
         return back()->with('success', 'Materi berhasil dihapus dari Learning Path.');
     }
-}
+
+    // --- FUNGSI PENTING UNTUK MEMPERBARUI URUTAN MATERI ---
+    public function updateOrder(Request $request, LearningPath $learningPath)
+    {
+        // 1. Validasi input: pastikan 'order' ada dan merupakan array
+        $request->validate([
+            'order' => 'required|array',
+            'order.*.id' => 'required|exists:materis,id_materi', 
+            'order.*.urutan' => 'required|integer|min:1',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // 2. Iterasi melalui urutan yang diterima dari frontend
+            foreach ($request->input('order') as $item) {
+                // Update kolom 'urutan' di tabel pivot 'learning_path_materi'
+                $learningPath->materis()->updateExistingPivot($item['id'], [
+                    'urutan' => $item['urutan'],
+                ]);
+            }
+
+            DB::commit();
+
+            // 3. Respon sukses dalam format JSON
+            return response()->json(['success' => 'Urutan materi berhasil diperbarui.'], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Respon error dalam format JSON
+            return response()->json(['error' => 'Gagal memperbarui urutan materi. Pesan: ' . $e->getMessage()], 500);
+        }
+    }
+} // TUTUP KELAS HANYA SATU KALI DI AKHIR FILE

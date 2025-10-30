@@ -51,20 +51,28 @@
             
             <h3 class="font-semibold text-xl text-gray-800 leading-tight mb-4">{{ __('Daftar Materi di Path Ini') }} ({{ $pathMateris->count() }} Materi)</h3>
             
+            <div class="text-right mb-4">
+                <x-secondary-button id="save-order-button" style="display: none;">
+                    {{ __('Simpan Urutan Baru') }}
+                </x-secondary-button>
+            </div>
+            
             <div class="shadow overflow-hidden border-b border-gray-200 rounded-lg">
                 <table class="min-w-full divide-y divide-gray-200 w-full">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-16">Urutan</th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-16 cursor-move">Urutan</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Materi</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi Singkat</th>
                             <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-200" id="sortable-list">
                         @forelse ($pathMateris as $materi)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">{{ $materi->pivot->urutan }}</td>
+                            <tr class="sortable-item" data-id="{{ $materi->id_materi }}">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center drag-handle cursor-move">
+                                    {{ $materi->pivot->urutan }}
+                                </td>
                                 <td class="px-6 py-4 whitespace-normal text-sm text-gray-800 break-words font-medium">
                                     <a href="{{ route('admin.materi.edit', $materi->id_materi) }}" class="text-indigo-600 hover:text-indigo-900 font-bold">
                                         {{ $materi->nama_materi }}
@@ -90,8 +98,108 @@
                 </table>
             </div>
             
-            {{-- Catatan: Jika ingin fitur drag/drop untuk urutan, Anda bisa menggunakan Livewire atau JavaScript --}}
-            
         </div>
     </div>
+    
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sortableList = document.getElementById('sortable-list');
+            const saveButton = document.getElementById('save-order-button');
+            let orderChanged = false;
+
+            if (typeof Sortable === 'undefined') {
+                console.error('SortableJS library not loaded. Check app-admin.blade.php for the CDN link.');
+                return; 
+            }
+
+            if (sortableList && sortableList.querySelector('.sortable-item')) {
+                new Sortable(sortableList, {
+                    animation: 150,
+                    handle: '.drag-handle', 
+                    onUpdate: function (evt) {
+                        orderChanged = true;
+                        saveButton.style.display = 'inline-block';
+                        updateDisplayOrder();
+                    }
+                });
+                
+                const dragHandles = document.querySelectorAll('.drag-handle');
+                dragHandles.forEach(handle => {
+                    handle.style.cursor = 'move';
+                });
+            }
+
+            function updateDisplayOrder() {
+                const items = sortableList.querySelectorAll('.sortable-item');
+                items.forEach((item, index) => {
+                    item.querySelector('.drag-handle').textContent = index + 1; 
+                });
+            }
+
+            saveButton.addEventListener('click', function() {
+                if (!orderChanged) return;
+                
+                saveButton.disabled = true;
+                saveButton.textContent = 'Menyimpan...';
+
+                const items = sortableList.querySelectorAll('.sortable-item');
+                const newOrder = [];
+                
+                items.forEach((item, index) => {
+                    newOrder.push({
+                        id: item.getAttribute('data-id'),
+                        urutan: index + 1 
+                    });
+                });
+                
+                // --- PERBAIKAN KRITIS: Menambahkan header X-Requested-With ---
+                fetch("{{ route('admin.learning-path.updateOrder', $learningPath->id) }}", {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // HEADER INI PENTING UNTUK LARAVEL CSRF
+                        'X-Requested-With': 'XMLHttpRequest', 
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ order: newOrder })
+                })
+                .then(response => {
+                    // Penanganan Error Kritis: Mendeteksi jika respons adalah HTML (redirect/error)
+                    const contentType = response.headers.get("content-type");
+                    
+                    if (!response.ok) {
+                        if (contentType && contentType.indexOf("application/json") !== -1) {
+                            return response.json(); 
+                        } else {
+                            // Respons adalah HTML (Inilah yang menyebabkan error Anda)
+                            alert('⚠️ Sesi berakhir, server error, atau token tidak valid. Mohon refresh halaman.');
+                            window.location.reload(); 
+                            throw new Error('Server returned non-JSON response (likely HTML redirect).');
+                        }
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert(data.success); 
+                        window.location.reload(); 
+                    } else {
+                        throw new Error(data.error || 'Gagal memperbarui urutan.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    let errorMessage = error.message || 'Terjadi kesalahan saat menyimpan urutan.';
+                    alert('Error: ' + errorMessage);
+                    
+                    saveButton.disabled = false;
+                    saveButton.textContent = 'Simpan Urutan Baru';
+                });
+            });
+
+        });
+    </script>
+    @endpush
+    
 </x-app-admin-layout>
