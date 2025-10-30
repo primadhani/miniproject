@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Materi extends Model
 {
@@ -29,5 +30,15 @@ class Materi extends Model
     {
         // Pastikan foreign key di Modul adalah id_materi
         return $this->hasMany(Modul::class, 'id_materi', 'id_materi');
+    }
+
+    public function learningPaths(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            LearningPath::class, 
+            'learning_path_materi', 
+            'materi_id',
+            'learning_path_id'
+        )->withPivot('urutan');
     }
 }

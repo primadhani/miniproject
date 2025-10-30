@@ -52,9 +52,13 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
-    Route::get('/learning-path', function () {
-        return view('admin.learning-path');
-    })->name('learning-path');
+    Route::resource('learning-path', App\Http\Controllers\LearningPathController::class)->names('learning-path');
+
+    // Rute untuk menambahkan Materi ke Learning Path tertentu
+    Route::post('learning-path/{learning_path}/add-materi', [App\Http\Controllers\LearningPathController::class, 'addMateri'])->name('learning-path.addMateri');
+    Route::delete('learning-path/{learning_path}/remove-materi/{materi}', [App\Http\Controllers\LearningPathController::class, 'removeMateri'])->name('learning-path.removeMateri');
+    Route::put('learning-path/{learning_path}/update-order', [LearningPathController::class, 'updateOrder'])->name('learning-path.updateOrder');
+
 
     Route::resource('materi', MateriController::class)->names('materi'); // <-- GANTI DENGAN INI
 

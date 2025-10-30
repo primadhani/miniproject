@@ -35,7 +35,7 @@ new class extends Component
                         {{ __('Users') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('admin.learning-path')" :active="request()->routeIs('admin.learning-path*')" wire:navigate>
+                    <x-nav-link :href="route('admin.learning-path.index')" :active="request()->routeIs('admin.learning-path*')" wire:navigate>
                         {{ __('Learning Path') }}
                     </x-nav-link>
 
@@ -91,7 +91,7 @@ new class extends Component
                 {{ __('Users') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('admin.learning-path')" :active="request()->routeIs('admin.learning-path*')" wire:navigate>
+            <x-responsive-nav-link :href="route('admin.learning-path.index')" :active="request()->routeIs('admin.learning-path*')" wire:navigate>
                 {{ __('Learning Path') }}
             </x-responsive-nav-link>
 
