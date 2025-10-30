@@ -39,7 +39,7 @@ new class extends Component
                         {{ __('Learning Path') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('admin.materi')" :active="request()->routeIs('admin.materi*')" wire:navigate>
+                    <x-nav-link :href="route('admin.materi.index')" :active="request()->routeIs('admin.materi*')" wire:navigate> 
                         {{ __('Materi') }}
                     </x-nav-link>
                 </div>
@@ -95,7 +95,7 @@ new class extends Component
                 {{ __('Learning Path') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('admin.materi')" :active="request()->routeIs('admin.materi*')" wire:navigate>
+            <x-responsive-nav-link :href="route('admin.materi.index')" :active="request()->routeIs('admin.materi*')" wire:navigate> 
                 {{ __('Materi') }}
             </x-responsive-nav-link>
         </div>

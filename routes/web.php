@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\MateriController;
+use App\Http\Controllers\ModulController;
+use App\Http\Controllers\BacaanController;
 
 Route::view('/', 'welcome');
 
@@ -43,22 +47,26 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users');
     
     // Rute untuk menampilkan form edit
-    Route::get('/users/{user}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
-    
-    // Rute untuk memproses update data
-    Route::put('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
-    
-    // Rute untuk menghapus data
-    Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroy');
-    
+    Route::get('/users', [UserController::class, 'index'])->name('users');
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
     Route::get('/learning-path', function () {
         return view('admin.learning-path');
     })->name('learning-path');
 
-    Route::get('/materi', function () {
-        return view('admin.materi');
-    })->name('materi');
+    Route::resource('materi', MateriController::class)->names('materi'); // <-- GANTI DENGAN INI
 
+    Route::resource('materi.modul', ModulController::class)
+        ->only(['index', 'create', 'store', 'edit', 'update', 'destroy'])
+        ->names('materi.modul');
+
+    // CRUD Bacaan (Nested di bawah Modul)
+    // Rute: admin/modul/{modul}/bacaan/* -> nama rute: admin.modul.bacaan.*
+    Route::resource('modul.bacaan', BacaanController::class)
+        ->only(['index', 'create', 'store', 'edit', 'update', 'destroy'])
+        ->names('modul.bacaan');
 });
 
 require __DIR__.'/auth.php';
