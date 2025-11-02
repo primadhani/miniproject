@@ -10,10 +10,9 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
 
-                    {{-- Form untuk Update Data User --}}
                     <form method="POST" action="{{ route('admin.users.update', $user) }}">
                         @csrf
-                        @method('PUT') {{-- Laravel menggunakan metode PUT/PATCH untuk update --}}
+                        @method('PUT')
 
                         <div class="mb-4">
                             <x-input-label for="name" :value="__('Nama')" />

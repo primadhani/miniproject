@@ -42,6 +42,10 @@ new class extends Component
                     <x-nav-link :href="route('admin.materi.index')" :active="request()->routeIs('admin.materi*')" wire:navigate> 
                         {{ __('Materi') }}
                     </x-nav-link>
+
+                    <x-nav-link :href="route('admin.tokens.index')" :active="request()->routeIs('admin.tokens*')" wire:navigate> 
+                        {{ __('Token') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -97,6 +101,10 @@ new class extends Component
 
             <x-responsive-nav-link :href="route('admin.materi.index')" :active="request()->routeIs('admin.materi*')" wire:navigate> 
                 {{ __('Materi') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('admin.tokens.index')" :active="request()->routeIs('admin.tokens*')" wire:navigate> 
+                {{ __('Token') }}
             </x-responsive-nav-link>
         </div>
 

@@ -28,37 +28,37 @@ new class extends Component
                 </div>
 
                 <!-- Navigation Links --><div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <!-- Home Link (sebelumnya Dashboard) --><x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate class="relative">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate class="relative">
                         {{ __('Home') }}
                         @if (request()->routeIs('dashboard'))
                             <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
                         @endif
                     </x-nav-link>
 
-                    <!-- Academy Link --><x-nav-link :href="route('academy')" :active="request()->routeIs('academy')" wire:navigate class="relative">
+                    <x-nav-link :href="route('user.academy')" :active="request()->routeIs('user.academy')" wire:navigate class="relative">
                         {{ __('Academy') }}
-                        @if (request()->routeIs('academy'))
+                        @if (request()->routeIs('user.academy'))
                             <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
                         @endif
                     </x-nav-link>
 
-                    <!-- Challenge Link --><x-nav-link :href="route('challenge')" :active="request()->routeIs('challenge')" wire:navigate class="relative">
+                    <x-nav-link :href="route('user.challenge')" :active="request()->routeIs('user.challenge')" wire:navigate class="relative">
                         {{ __('Challenge') }}
-                        @if (request()->routeIs('challenge'))
+                        @if (request()->routeIs('user.challenge'))
                             <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
                         @endif
                     </x-nav-link>
 
-                    <!-- Event Link --><x-nav-link :href="route('event')" :active="request()->routeIs('event')" wire:navigate class="relative">
+                    <x-nav-link :href="route('user.event')" :active="request()->routeIs('user.event')" wire:navigate class="relative">
                         {{ __('Event') }}
-                        @if (request()->routeIs('event'))
+                        @if (request()->routeIs('user.event'))
                             <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
                         @endif
                     </x-nav-link>
 
-                    <!-- Job Link --><x-nav-link :href="route('job')" :active="request()->routeIs('job')" wire:navigate class="relative">
+                    <x-nav-link :href="route('user.job')" :active="request()->routeIs('user.job')" wire:navigate class="relative">
                         {{ __('Job') }}
-                        @if (request()->routeIs('job'))
+                        @if (request()->routeIs('user.job'))
                             <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
                         @endif
                     </x-nav-link>
@@ -101,23 +101,23 @@ new class extends Component
 
     <!-- Responsive Navigation Menu (untuk mobile, sesuaikan jika perlu) --><div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <!-- Home Link --><x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Home') }}
             </x-responsive-nav-link>
             
-            <!-- Academy Link --><x-responsive-nav-link :href="route('academy')" :active="request()->routeIs('academy')" wire:navigate>
+            <x-responsive-nav-link :href="route('user.academy')" :active="request()->routeIs('user.academy')" wire:navigate>
                 {{ __('Academy') }}
             </x-responsive-nav-link>
 
-            <!-- Challenge Link --><x-responsive-nav-link :href="route('challenge')" :active="request()->routeIs('challenge')" wire:navigate>
+            <x-responsive-nav-link :href="route('user.challenge')" :active="request()->routeIs('user.challenge')" wire:navigate>
                 {{ __('Challenge') }}
             </x-responsive-nav-link>
 
-            <!-- Event Link --><x-responsive-nav-link :href="route('event')" :active="request()->routeIs('event')" wire:navigate>
+            <x-responsive-nav-link :href="route('user.event')" :active="request()->routeIs('user.event')" wire:navigate>
                 {{ __('Event') }}
             </x-responsive-nav-link>
 
-            <!-- Job Link --><x-responsive-nav-link :href="route('job')" wire:navigate>
+            <x-responsive-nav-link :href="route('user.job')" :active="request()->routeIs('user.job')" wire:navigate>
                 {{ __('Job') }}
             </x-responsive-nav-link>
         </div>

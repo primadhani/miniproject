@@ -5,6 +5,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MateriController;
 use App\Http\Controllers\ModulController;
 use App\Http\Controllers\BacaanController;
+use App\Http\Controllers\TokenController;
+use App\Http\Controllers\RedeemController;
+use App\Http\Controllers\AcademyController;
+use App\Http\Controllers\LearningPathController;
 
 Route::view('/', 'welcome');
 
@@ -17,23 +21,35 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-// --- RUTE PENGGUNA BIASA (USER ROUTES) ---
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware('auth')->group(function () {
+    Route::view('dashboard', 'dashboard')->name('dashboard');
+
+    // --- Rute User ---
+    
     // Academy
-    Route::view('academy', 'user.academy')
-        ->name('academy');
+    Route::get('/academy', [AcademyController::class, 'index'])
+        ->name('user.academy'); 
 
+    // Learning Path Show untuk User (BARU)
+    // Menggunakan LearningPathController@show (Jika Anda sudah memiliki metode ini)
+    Route::get('/academy/learning-path/{learning_path}', [LearningPathController::class, 'show'])
+        ->name('user.learning-path.show');
+
+    // Event (Tempat Redeem)
+    Route::get('/event', [RedeemController::class, 'eventIndex'])
+        ->name('user.event');
+
+    // Redeem Token
+    Route::post('/redeem-token', [RedeemController::class, 'redeemToken'])
+        ->name('redeem.token');
+    
     // Challenge
-    Route::view('challenge', 'user.challenge')
-        ->name('challenge');
-
-    // Event
-    Route::view('event', 'user.event')
-        ->name('event');
+    Route::view('/challenge', 'user.challenge')
+        ->name('user.challenge');
 
     // Job
-    Route::view('job', 'user.job')
-        ->name('job');
+    Route::view('/job', 'user.job')
+        ->name('user.job');
 });
 
 // Admin routes
@@ -71,6 +87,8 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::resource('modul.bacaan', BacaanController::class)
         ->only(['index', 'create', 'store', 'edit', 'update', 'destroy'])
         ->names('modul.bacaan');
+
+    Route::resource('tokens', TokenController::class)->except(['show']);
 });
 
 require __DIR__.'/auth.php';

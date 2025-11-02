@@ -10,7 +10,6 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
 
-                    {{-- Form untuk Tambah Materi Baru --}}
                     <form method="POST" action="{{ route('admin.materi.store') }}">
                         @csrf
 

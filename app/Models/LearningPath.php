@@ -24,14 +24,21 @@ class LearningPath extends Model
     {
         return $this->belongsToMany(
             Materi::class, 
-            'learning_path_materi', // Nama pivot table
-            'learning_path_id',     // Foreign key model ini di pivot table
-            'materi_id'             // Foreign key target model di pivot table
+            'learning_path_materi',
+            'learning_path_id',
+            'materi_id'
         )
-        // Memuat kolom 'urutan' dari tabel pivot
         ->withPivot('urutan')
-        // PERBAIKAN: Menggunakan nama tabel pivot yang sebenarnya ('learning_path_materi') 
-        // saat mengurutkan agar query SQL mengenali kolom 'urutan'.
         ->orderBy('learning_path_materi.urutan', 'asc'); 
+    }
+
+    public function tokens(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Token::class,
+            'token_learning_path',
+            'learning_path_id',
+            'token_id'
+        );
     }
 }

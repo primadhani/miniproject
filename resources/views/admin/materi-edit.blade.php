@@ -10,10 +10,9 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
 
-                    {{-- Form untuk Update Data Materi --}}
                     <form method="POST" action="{{ route('admin.materi.update', $materi->id_materi) }}">
                         @csrf
-                        @method('PUT') {{-- Menggunakan PUT/PATCH untuk update di Laravel --}}
+                        @method('PUT')
 
                         <div class="mb-4">
                             <x-input-label for="nama_materi" :value="__('Nama Materi')" />

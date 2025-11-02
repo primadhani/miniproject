@@ -28,7 +28,6 @@ class Materi extends Model
      */
     public function moduls(): HasMany
     {
-        // Pastikan foreign key di Modul adalah id_materi
         return $this->hasMany(Modul::class, 'id_materi', 'id_materi');
     }
 
