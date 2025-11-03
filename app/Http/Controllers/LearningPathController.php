@@ -4,26 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Models\LearningPath;
 use App\Models\Materi;
+use App\Models\Bacaan; // PENTING: Import model Bacaan
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller; 
 
 class LearningPathController extends Controller
 {
-    // READ: Menampilkan daftar Learning Path
+    // READ: Menampilkan daftar Learning Path (Admin)
     public function index()
     {
         $learningPaths = LearningPath::withCount('materis')->paginate(10);
         return view('admin.learning-path.index', compact('learningPaths'));
     }
 
-    // CREATE: Menampilkan form
+    // CREATE: Menampilkan form (Admin)
     public function create()
     {
         return view('admin.learning-path.create');
     }
 
-    // CREATE: Menyimpan data baru
+    // CREATE: Menyimpan data baru (Admin)
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -36,7 +37,7 @@ class LearningPathController extends Controller
         return redirect()->route('admin.learning-path.index')->with('success', 'Learning Path baru berhasil ditambahkan.');
     }
 
-    // SHOW: Menampilkan detail Learning Path dan form untuk menambah Materi
+    // SHOW: Menampilkan detail Learning Path dan form untuk menambah Materi (Admin)
     public function show(LearningPath $learningPath)
     {
         // PENTING: Muat materi yang sudah terhubung dengan path ini, diurutkan berdasarkan urutan pivot
@@ -49,13 +50,13 @@ class LearningPathController extends Controller
         return view('admin.learning-path.show', compact('learningPath', 'pathMateris', 'availableMateris'));
     }
 
-    // UPDATE: Menampilkan form edit
+    // UPDATE: Menampilkan form edit (Admin)
     public function edit(LearningPath $learningPath)
     {
         return view('admin.learning-path.edit', compact('learningPath'));
     }
 
-    // UPDATE: Memperbarui data
+    // UPDATE: Memperbarui data (Admin)
     public function update(Request $request, LearningPath $learningPath)
     {
         $validated = $request->validate([
@@ -68,16 +69,16 @@ class LearningPathController extends Controller
         return redirect()->route('admin.learning-path.index')->with('success', 'Learning Path berhasil diperbarui.');
     }
 
-    // DELETE: Menghapus data
+    // DELETE: Menghapus data (Admin)
     public function destroy(LearningPath $learningPath)
     {
         $learningPath->delete();
         return redirect()->route('admin.learning-path.index')->with('success', 'Learning Path berhasil dihapus.');
     }
     
-    // --- FUNGSI KHUSUS UNTUK MENAMBAH DAN MENGHAPUS MATERI ---
+    // --- FUNGSI KHUSUS UNTUK MENAMBAH DAN MENGHAPUS MATERI (Admin) ---
 
-    // Menambahkan Materi ke Learning Path (Fungsi Khusus)
+    // Menambahkan Materi ke Learning Path 
     public function addMateri(Request $request, LearningPath $learningPath)
     {
         $validated = $request->validate([
@@ -92,27 +93,23 @@ class LearningPathController extends Controller
         $nextUrutan = ($maxUrutan ?? 0) + 1;
 
         try {
-            // attach($materi_id, $pivot_data)
             $learningPath->materis()->attach($validated['materi_id'], ['urutan' => $nextUrutan]);
             return back()->with('success', 'Materi berhasil ditambahkan ke Learning Path.');
         } catch (\Exception $e) {
-            // Jika materi sudah ada (primary key violation)
             return back()->with('error', 'Materi sudah ada di Learning Path ini. Error: ' . $e->getMessage());
         }
     }
 
-    // Menghapus Materi dari Learning Path (Fungsi Khusus)
+    // Menghapus Materi dari Learning Path 
     public function removeMateri(LearningPath $learningPath, Materi $materi)
     {
-        // detach() akan menerima primary key dari model yang terhubung (id_materi)
         $learningPath->materis()->detach($materi->id_materi);
         return back()->with('success', 'Materi berhasil dihapus dari Learning Path.');
     }
 
-    // --- FUNGSI PENTING UNTUK MEMPERBARUI URUTAN MATERI ---
+    // --- FUNGSI PENTING UNTUK MEMPERBARUI URUTAN MATERI (Admin) ---
     public function updateOrder(Request $request, LearningPath $learningPath)
     {
-        // 1. Validasi input: pastikan 'order' ada dan merupakan array
         $request->validate([
             'order' => 'required|array',
             'order.*.id' => 'required|exists:materis,id_materi', 
@@ -121,24 +118,46 @@ class LearningPathController extends Controller
 
         try {
             DB::beginTransaction();
-
-            // 2. Iterasi melalui urutan yang diterima dari frontend
             foreach ($request->input('order') as $item) {
-                // Update kolom 'urutan' di tabel pivot 'learning_path_materi'
                 $learningPath->materis()->updateExistingPivot($item['id'], [
                     'urutan' => $item['urutan'],
                 ]);
             }
 
             DB::commit();
-
-            // 3. Respon sukses dalam format JSON
             return response()->json(['success' => 'Urutan materi berhasil diperbarui.'], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // Respon error dalam format JSON
             return response()->json(['error' => 'Gagal memperbarui urutan materi. Pesan: ' . $e->getMessage()], 500);
         }
     }
-} // TUTUP KELAS HANYA SATU KALI DI AKHIR FILE
+
+    // ⭐ FUNGSI BARU UNTUK TAMPILAN AKADEMI USER (DETAIL MATERI) ⭐
+    public function showMateri(Materi $materi) 
+    {
+        // Muat Modul dan nested Bacaan (Eager Loading)
+        $materi->load(['moduls' => function ($query) {
+            // Asumsi Modul memiliki kolom 'urutan'
+            $query->orderBy('urutan')->with(['bacaan' => function ($query) {
+                // Asumsi Bacaan memiliki kolom 'urutan'
+                $query->orderBy('urutan'); 
+            }]);
+        }]);
+
+        $firstBacaan = null;
+        
+        // Cari Bacaan pertama dari Modul pertama yang memiliki bacaan
+        if ($materi->moduls->isNotEmpty()) {
+            foreach ($materi->moduls as $modul) {
+                if ($modul->bacaan->isNotEmpty()) {
+                    $firstBacaan = $modul->bacaan->first();
+                    break;
+                }
+            }
+        } 
+        
+        // Mengarahkan ke view user
+        return view('user.learning-path.show', compact('materi', 'firstBacaan'));
+    }
+}

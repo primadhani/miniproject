@@ -35,6 +35,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/academy/learning-path/{learning_path}', [LearningPathController::class, 'show'])
         ->name('user.learning-path.show');
 
+    Route::get('/materi/{materi}', [LearningPathController::class, 'showMateri'])
+     ->name('user.materi.show');
+
     // Event (Tempat Redeem)
     Route::get('/event', [RedeemController::class, 'eventIndex'])
         ->name('user.event');
