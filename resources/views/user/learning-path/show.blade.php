@@ -7,25 +7,26 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            {{-- Menggunakan flex untuk layout dua kolom dan memberikan tinggi minimum --}}
             <div class="flex bg-white shadow-xl sm:rounded-lg min-h-[70vh]">
                 
-                {{-- Kiri: Navigasi Modul dan Bacaan --}}
+                {{-- Kiri: Navigasi Modul dan Bacaan (Lebar 1/4) --}}
                 <div class="w-1/4 border-r border-gray-200 p-6 bg-gray-50 overflow-y-auto">
                     <h3 class="text-lg font-bold mb-4 text-indigo-700 border-b pb-2">Daftar Modul</h3>
                     
-                    @forelse ($materi->moduls as $modul)
+                    {{-- Iterasi Modul (Menggunakan 'moduls' untuk mengatasi error relasi sebelumnya) --}}
+                    @forelse ($materi->moduls as $modul) 
                         <div class="mb-3">
-                            {{-- Gunakan $modul->bacaan (singular) --}}
-                            {{-- Membuka modul yang berisi bacaan pertama secara default --}}
-                            <details class="group" @if($firstBacaan && $modul->bacaan->contains('id_bacaan', $firstBacaan->id_bacaan)) open @endif>
+                            
+                            {{-- Modul Header --}}
+                            <details class="group" open> 
                                 <summary class="flex justify-between items-center cursor-pointer list-none py-2 px-3 bg-indigo-100 text-indigo-800 font-semibold rounded-md hover:bg-indigo-200 transition duration-150">
-                                    <span>{{ $modul->nama_modul }}</span>
+                                    <span>{{ $modul->judul_modul }}</span>
                                     <svg class="w-4 h-4 transition duration-300 transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </summary>
                                 
                                 {{-- Dropdown: Daftar Bacaan --}}
                                 <ul class="mt-2 space-y-1 pl-3 border-l border-indigo-300">
-                                    {{-- Gunakan $modul->bacaan (singular) --}}
                                     @forelse ($modul->bacaan as $bacaan) 
                                         <li class="py-1">
                                             <a href="#" 
@@ -33,7 +34,9 @@
                                                data-bacaan-judul="{{ $bacaan->judul_bacaan }}"
                                                {{-- Konten di-encode agar aman saat ditransfer melalui atribut data-* --}}
                                                data-bacaan-konten="{{ json_encode($bacaan->isi_bacaan) }}" 
-                                               class="bacaan-link block text-sm text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 p-1 rounded transition duration-100"
+                                               class="bacaan-link block text-sm text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 p-1 rounded transition duration-100
+                                                    {{-- Tandai bacaan pertama di modul pertama sebagai aktif --}}
+                                                    @if ($loop->parent->first && $loop->first) active-bacaan text-indigo-700 bg-indigo-100 font-semibold @endif"
                                             >
                                                 {{ $bacaan->judul_bacaan }}
                                             </a>
@@ -49,18 +52,11 @@
                     @endforelse
                 </div>
 
-                {{-- Kanan: Konten Bacaan Utama --}}
-                <div class="w-3/4 p-8 overflow-y-auto">
-                    <div id="bacaan-container">
-                        @if ($firstBacaan)
-                            <h1 id="bacaan-judul" class="text-3xl font-extrabold mb-6 text-gray-900">{{ $firstBacaan->judul_bacaan }}</h1>
-                            <div id="bacaan-konten" class="prose max-w-none text-gray-700">
-                                {{-- Konten default pertama kali dimuat --}}
-                                {!! nl2br(e($firstBacaan->isi_bacaan)) !!}
-                            </div>
-                        @else
-                            <p class="text-gray-500 italic">Pilih modul dan bacaan dari panel di samping untuk memulai.</p>
-                        @endif
+                {{-- Kanan: Konten Bacaan Utama (Lebar 3/4) --}}
+                <div id="bacaan-container" class="w-3/4 p-8 overflow-y-auto">
+                    <h1 id="bacaan-judul" class="text-3xl font-extrabold mb-6 text-gray-900">Pilih Bacaan di Samping</h1>
+                    <div id="bacaan-konten" class="prose max-w-none text-gray-700">
+                        <p class="text-gray-500">Silakan klik salah satu judul bacaan dari daftar modul di panel sebelah kiri untuk memulai.</p>
                     </div>
                 </div>
 
@@ -68,78 +64,98 @@
         </div>
     </div>
 
-    @push('scripts')
+    {{-- Script JavaScript untuk Mengganti Konten Secara Dinamis --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const links = document.querySelectorAll('.bacaan-link');
-            const bacaanContainer = document.getElementById('bacaan-container');
             const bacaanJudulElement = document.getElementById('bacaan-judul');
             const bacaanKontenElement = document.getElementById('bacaan-konten');
+            const bacaanContainer = document.getElementById('bacaan-container');
 
-            // Fungsi untuk menandai link aktif
-            function setActiveLink(activeId) {
-                links.forEach(l => {
-                    l.classList.remove('font-bold', 'bg-indigo-50', 'text-indigo-700');
-                });
-                const activeLink = document.querySelector(`.bacaan-link[data-bacaan-id="${activeId}"]`);
-                if (activeLink) {
-                    activeLink.classList.add('font-bold', 'bg-indigo-50', 'text-indigo-700');
-                    
-                    const parentDetails = activeLink.closest('details');
-                    if(parentDetails) {
-                        parentDetails.open = true;
-                    }
-                }
+            if (!bacaanJudulElement || !bacaanKontenElement) {
+                console.error('Elemen konten utama tidak ditemukan.');
+                return;
             }
 
-            // Inisialisasi: Tandai bacaan pertama yang dimuat
-            const initialId = {{ $firstBacaan->id_bacaan ?? 'null' }}; 
-            if (initialId) {
-                setActiveLink(initialId);
+            /**
+             * Mengatur class aktif pada link yang sedang dipilih
+             */
+            function setActiveLink(activeId) {
+                links.forEach(link => {
+                    // Hapus semua class aktif sebelumnya
+                    link.classList.remove('active-bacaan', 'font-semibold', 'bg-indigo-50', 'text-indigo-700');
+                    link.classList.add('text-gray-700');
+                    
+                    // Tambahkan class aktif pada link yang sesuai
+                    if (link.getAttribute('data-bacaan-id') === activeId) {
+                        link.classList.add('active-bacaan', 'font-semibold', 'bg-indigo-50', 'text-indigo-700');
+                        // Buka elemen <details> parent agar modul terlihat
+                        const parentDetails = link.closest('details');
+                        if (parentDetails) {
+                            parentDetails.open = true;
+                        }
+                    }
+                });
             }
             
+            /**
+             * Mengambil data dari elemen link dan menampilkannya di panel konten
+             */
+            function displayBacaan(element) {
+                const id = element.getAttribute('data-bacaan-id');
+                const judul = element.getAttribute('data-bacaan-judul');
+                const kontenString = element.getAttribute('data-bacaan-konten');
+                let konten = null;
+
+                // 1. Ambil dan parse konten JSON
+                try {
+                    if (kontenString) {
+                        konten = JSON.parse(kontenString); 
+                    }
+                } catch (error) {
+                    konten = kontenString; 
+                }
+
+                setActiveLink(id);
+                
+                // 2. Tampilkan Judul
+                bacaanJudulElement.innerText = judul;
+                
+                // 3. Tampilkan Konten (Pencegahan XSS dan format)
+                if (konten) {
+                    const finalKonten = String(konten);
+                    
+                    // PERBAIKAN KEAMANAN: Escape HTML untuk Pencegahan XSS
+                    const tempElement = document.createElement('div');
+                    tempElement.textContent = finalKonten;
+                    const safeKonten = tempElement.innerHTML; 
+                    
+                    // Tampilkan konten yang sudah aman, ganti newline dengan <br> agar paragraf terlihat
+                    bacaanKontenElement.innerHTML = safeKonten.replace(/\n/g, '<br>');
+                } else {
+                     bacaanKontenElement.innerHTML = '<p class="text-gray-500 italic">Konten bacaan ini kosong atau tidak dapat dimuat.</p>';
+                }
+
+                // Gulir ke atas halaman konten
+                if (bacaanContainer) {
+                    bacaanContainer.scrollTop = 0;
+                }
+            }
+            
+            // 4. Tambahkan Event Listener untuk menangani klik
             links.forEach(link => {
                 link.addEventListener('click', function (e) {
                     e.preventDefault();
-                    
-                    const id = this.getAttribute('data-bacaan-id');
-                    const judul = this.getAttribute('data-bacaan-judul');
-                    
-                    const kontenString = this.getAttribute('data-bacaan-konten');
-                    let konten = null;
-
-                    // Perbaikan utama: Penanganan JSON.parse yang aman dan pemeriksaan nilai
-                    try {
-                        // Coba parse string JSON. Jika isinya valid (mis. '"Isi Konten"'), maka akan dikembalikan 'Isi Konten'
-                        if (kontenString) {
-                            konten = JSON.parse(kontenString); 
-                        }
-                    } catch (error) {
-                        // Fallback: Jika gagal parse, gunakan string mentahnya
-                        konten = kontenString; 
-                    }
-
-                    setActiveLink(id);
-                    
-                    // 1. Ganti Judul
-                    bacaanJudulElement.innerText = judul;
-                    
-                    // 2. Ganti Konten (dengan penanganan null/undefined)
-                    if (konten) {
-                        // Pastikan 'konten' adalah string sebelum memanggil .replace()
-                        const finalKonten = String(konten);
-                        
-                        // Ganti newline dengan <br> untuk menampilkan konten dengan format yang benar
-                        bacaanKontenElement.innerHTML = finalKonten.replace(/\n/g, '<br>');
-                    } else {
-                         bacaanKontenElement.innerHTML = '<p class="text-gray-500 italic">Konten bacaan ini kosong atau tidak dapat dimuat.</p>';
-                    }
-
-                    // Gulir ke atas
-                    bacaanContainer.scrollTop = 0;
+                    displayBacaan(this);
                 });
             });
+
+            // 5. Inisialisasi: Tampilkan konten dari bacaan pertama saat halaman dimuat
+            const initialLink = document.querySelector('.bacaan-link.active-bacaan');
+            if (initialLink) {
+                displayBacaan(initialLink);
+            }
+            // Tidak perlu else if (links.length > 0) karena logic inisialisasi sudah kuat
         });
     </script>
-    @endpush
 </x-app-layout>
