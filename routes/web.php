@@ -9,6 +9,7 @@ use App\Http\Controllers\TokenController;
 use App\Http\Controllers\RedeemController;
 use App\Http\Controllers\AcademyController;
 use App\Http\Controllers\LearningPathController;
+use App\Http\Controllers\AdminDashboardController;
 
 Route::view('/', 'welcome');
 
@@ -59,9 +60,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users');
     
