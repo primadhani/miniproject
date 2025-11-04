@@ -23,7 +23,7 @@ new #[Layout('layouts.guest')] class extends Component
 
         // Cek role user setelah authenticate
         $user = Auth::user();
-        
+
         if ($user->role === 'admin') {
             $this->redirectIntended(default: route('admin.dashboard', absolute: false), navigate: true);
         } else {
@@ -33,47 +33,83 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <!-- Session Status -->
+    <h3 class="text-4xl font-display font-bold mb-6 text-gray-900">Masuk</h3>
+
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form wire:submit="login">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
+    <form wire:submit="login" class="auth-form-v3" autocomplete="off">
+        <div class="mb-4">
+            <input
+                wire:model="form.email"
+                id="email"
+                class="block w-full dcd-default-form font-medium"
+                type="email"
+                name="login_email"
+                placeholder="Email"
+                required
+                autofocus
+                autocomplete="email"
+            />
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        <div class="mb-4">
+            <div class="relative">
+                <input
+                    wire:model="form.password"
+                    id="login-password"
+                    class="block w-full dcd-default-form font-medium"
+                    type="password"
+                    name="login_password"
+                    placeholder="Password"
+                    required
+                    autocomplete="current-password"
+                />
+            </div>
 
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+            <div class="flex items-center justify-between mt-3">
+                <div class="block">
+                    <label for="remember_me" class="inline-flex items-center text-sm">
+                        <input wire:model="form.remember" id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember_me">
+                        <span class="ms-2 text-sm text-gray-600">Remember me</span>
+                    </label>
+                </div>
+
+                @if (Route::has('password.request'))
+                    <a class="text-sm font-medium dcd-link" href="{{ route('password.request') }}" wire:navigate>
+                        Lupa Password?
+                    </a>
+                @endif
+            </div>
 
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
+        <div class="mb-4">
+            <button type="submit" class="dcd-btn dcd-btn-primary w-full py-2 font-medium rounded-md font-display">
+                Masuk
+            </button>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
+        <div class="text-center mt-3">
+            Belum punya akun? Ayo
+            <a class="dcd-link font-medium text-sm" href="{{ route('register') }}" wire:navigate>
+                daftar
+            </a>
+        </div>
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+        <hr class="mt-4 mb-3 border-gray-200">
+
+        <div class="text-center text-xs text-gray-500">
+            <small>
+                Dengan melakukan login, Anda setuju dengan <a href="https://www.dicoding.com/termsofuse" class="dcd-link">syarat &amp; ketentuan Dicoding</a>.
+            </small>
+
+            <div class="small mt-2">
+                This site is protected by reCAPTCHA and the Google
+                <a href="https://policies.google.com/privacy" class="dcd-link">Privacy Policy</a> and
+                <a href="https://policies.google.com/terms" class="dcd-link">Terms of Service</a> apply.
+            </div>
         </div>
     </form>
 </div>

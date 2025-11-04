@@ -37,13 +37,14 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($bacaans as $bacaan)
-                            <tr>
+                            <tr class="cursor-pointer hover:bg-gray-50" 
+                                onclick="window.location='{{ route('admin.modul.bacaan.edit', [$modul->id_modul, $bacaan->id_bacaan]) }}'">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">{{ $bacaan->urutan }}</td>
                                 <td class="px-6 py-4 whitespace-normal text-sm text-gray-800 break-words font-medium">{{ $bacaan->judul_bacaan }}</td>
                                 <td class="px-6 py-4 whitespace-normal text-sm text-gray-700 break-words max-w-lg">
                                     {{ \Illuminate\Support\Str::limit(strip_tags($bacaan->isi_bacaan), 100, '...') }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center" onclick="event.stopPropagation()">
                                     <a href="{{ route('admin.modul.bacaan.edit', [$modul->id_modul, $bacaan->id_bacaan]) }}" class="text-indigo-600 hover:text-indigo-900 font-medium mr-2">Edit</a>
                                     <form action="{{ route('admin.modul.bacaan.destroy', [$modul->id_modul, $bacaan->id_bacaan]) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Bacaan: {{ $bacaan->judul_bacaan }}?');">
                                         @csrf

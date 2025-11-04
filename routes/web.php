@@ -92,6 +92,10 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
         ->names('modul.bacaan');
 
     Route::resource('tokens', TokenController::class)->except(['show']);
+
+    Route::get('/profile', function () {
+    return view('admin.profile.index'); 
+})->name('profile.index');
 });
 
 require __DIR__.'/auth.php';

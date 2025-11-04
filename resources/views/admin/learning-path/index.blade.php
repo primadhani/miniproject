@@ -3,9 +3,6 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Manajemen Learning Path') }}
         </h2>
-        <div class="text-sm mt-1">
-            Learning Path
-        </div>
     </x-slot>
 
     <div class="py-6">
@@ -34,15 +31,14 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($learningPaths as $path)
-                            <tr>
+                            <tr class="cursor-pointer hover:bg-gray-50" 
+                                onclick="window.location='{{ route('admin.learning-path.show', $path->id) }}'">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                     {{ $path->id }}
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-normal text-sm text-gray-800 break-words font-medium">
-                                    <a href="{{ route('admin.learning-path.show', $path->id) }}" class="text-indigo-600 hover:text-indigo-900 font-bold">
-                                        {{ $path->nama_path }}
-                                    </a>
+                                    {{ $path->nama_path }}
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-normal text-sm text-gray-700 break-words max-w-sm">
@@ -50,12 +46,12 @@
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <a href="{{ route('admin.learning-path.show', $path->id) }}" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                         {{ $path->materis_count }} Materi
-                                    </a>
+                                    </span>
                                 </td>
                                 
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center" onclick="event.stopPropagation()">
                                     <a href="{{ route('admin.learning-path.edit', $path->id) }}" class="text-indigo-600 hover:text-indigo-900 font-medium mr-3">
                                         Edit
                                     </a>

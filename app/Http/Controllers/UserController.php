@@ -4,92 +4,136 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     /**
-     * Menampilkan daftar semua user dengan fitur search, sorting, dan pagination.
+     * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        // 1. Tentukan kolom dan arah default untuk sorting
-        $sortColumn = $request->get('sort', 'id'); // Default sort: 'id'
-        $sortDirection = $request->get('direction', 'asc'); // Default direction: 'asc'
-        $searchQuery = $request->get('search'); // Ambil kata kunci pencarian
+        $sortColumn = $request->get('sort', 'id');
+        $sortDirection = $request->get('direction', 'desc');
+        $searchQuery = $request->get('search');
 
-        // BARIS PENTING BERUBAH: Tambahkan 'created_at' ke kolom yang diizinkan!
-        $allowedColumns = ['id', 'name', 'email', 'role', 'created_at']; 
-        
-        // Pastikan kolom yang diminta aman untuk sorting
-        if (!in_array($sortColumn, $allowedColumns)) {
-            $sortColumn = 'id';
-        }
-        $sortDirection = strtolower($sortDirection) === 'desc' ? 'desc' : 'asc';
-
-        // Mulai query builder
+        // PERUBAHAN: Menghapus filter 'role', sehingga menampilkan SEMUA user.
         $usersQuery = User::query();
 
-        // 2. Terapkan Pencarian (Search)
+        // Apply Search
         if ($searchQuery) {
             $usersQuery->where(function ($query) use ($searchQuery) {
                 $query->where('name', 'like', '%' . $searchQuery . '%')
-                      ->orWhere('email', 'like', '%' . $searchQuery . '%')
-                      ->orWhere('role', 'like', '%' . $searchQuery . '%');
+                      ->orWhere('email', 'like', '%' . $searchQuery . '%');
             });
         }
 
-        // 3. Terapkan Pengurutan (Sorting)
-        $usersQuery->orderBy($sortColumn, $sortDirection);
+        // Apply Sorting
+        $users = $usersQuery
+            ->orderBy($sortColumn, $sortDirection)
+            ->paginate(10)
+            ->withQueryString();
 
-        // 4. Terapkan Pagination (10 item per halaman)
-        $users = $usersQuery->paginate(10)->withQueryString();
-
-        // Mengirim data ke view, termasuk parameter sorting dan search saat ini
-        return view('admin.users', compact('users', 'sortColumn', 'sortDirection', 'searchQuery'));
+        // UPDATE PATH VIEW: dari admin.users menjadi admin.user.index
+        return view('admin.user.index', compact('users', 'sortColumn', 'sortDirection', 'searchQuery'));
     }
 
     /**
-     * Menampilkan form untuk mengedit user tertentu.
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        // Karena view create tidak ada, alihkan kembali atau tampilkan error.
+        // Jika Anda tidak menggunakan fitur ini, alihkan kembali ke index.
+        return redirect()->route('admin.users.index');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => bcrypt($validated['password']),
+            'role' => 'user', // Set default role to 'user'
+        ]);
+
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        // Not implemented or just redirects
+        return redirect()->route('admin.users.edit', $id);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
      */
     public function edit(User $user)
     {
-        // Pastikan Anda sudah membuat file resources/views/admin/users-edit.blade.php
-        return view('admin.users-edit', compact('user'));
+        // Only allow editing of 'user' role accounts, not admin
+        // PERUBAHAN: Anda MUNGKIN ingin mengizinkan edit akun admin, tetapi ini berbahaya.
+        // Biarkan validasi tetap ada jika Anda hanya ingin mengedit user biasa.
+        if ($user->role !== 'user') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // UPDATE PATH VIEW: dari admin.users-edit menjadi admin.user.edit
+        return view('admin.user.edit', compact('user'));
     }
 
     /**
-     * Memperbarui data user di database.
+     * Update the specified resource in storage.
      */
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        // Only allow editing of 'user' role accounts, not admin
+        if ($user->role !== 'user') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
+            // Unique rule excluded for the current user being updated
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|in:admin,user',
-            'password' => 'nullable|min:6|confirmed', // 'confirmed' mencari field 'password_confirmation'
+            'password' => 'nullable|string|min:8|confirmed', // Password is now optional for update
         ]);
 
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->role = $request->role;
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
 
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
+        if (!empty($validated['password'])) {
+            $user->password = bcrypt($validated['password']);
         }
 
         $user->save();
 
-        return redirect()->route('admin.users')->with('success', 'Data user berhasil diperbarui.');
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
     }
 
     /**
-     * Menghapus user dari database.
+     * Remove the specified resource from storage.
      */
     public function destroy(User $user)
     {
+        // Only allow deleting of 'user' role accounts, not admin
+        if ($user->role !== 'user') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $user->delete();
 
-        return redirect()->route('admin.users')->with('success', 'User berhasil dihapus.');
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
     }
 }

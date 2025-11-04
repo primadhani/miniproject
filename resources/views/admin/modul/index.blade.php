@@ -36,15 +36,15 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($moduls as $modul)
-                            <tr>
+                            <tr class="cursor-pointer hover:bg-gray-50" onclick="window.location='{{ route('admin.modul.bacaan.index', $modul->id_modul) }}'">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">{{ $modul->urutan }}</td>
                                 <td class="px-6 py-4 whitespace-normal text-sm text-gray-800 break-words font-medium">{{ $modul->nama_modul }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <a href="{{ route('admin.modul.bacaan.index', $modul->id_modul) }}" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                         {{ $modul->bacaan_count }} Bacaan
-                                    </a>
+                                    </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center" onclick="event.stopPropagation()">
                                     <a href="{{ route('admin.materi.modul.edit', [$materi->id_materi, $modul->id_modul]) }}" class="text-indigo-600 hover:text-indigo-900 font-medium mr-2">Edit</a>
                                     <form action="{{ route('admin.materi.modul.destroy', [$materi->id_materi, $modul->id_modul]) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Modul: {{ $modul->nama_modul }} dan semua bacaan terkait?');">
                                         @csrf

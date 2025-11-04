@@ -17,16 +17,18 @@
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert"><span class="block sm:inline">{{ session('error') }}</span></div>
             @endif
 
-            <div class="mb-6 flex justify-between items-center">
+            <div class="mb-4">
                 <a href="{{ route('admin.materi.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     {{ __('Tambah Materi Baru') }}
                 </a>
-
-                <form method="GET" action="{{ route('admin.materi.index') }}" class="w-full max-w-sm ml-4">
+            </div>
+            
+            <div class="mb-6">
+                <form method="GET" action="{{ route('admin.materi.index') }}" class="w-full max-w-sm">
                     <div class="flex items-center space-x-2">
                         <input type="text" name="search" placeholder="Cari Nama atau Deskripsi Materi..." 
-                               value="{{ $searchQuery ?? '' }}"
-                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
+                                value="{{ $searchQuery ?? '' }}"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2">
                         
                         <x-primary-button type="submit">
                             {{ __('Cari') }}
@@ -93,15 +95,13 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($materis as $materi)
-                            <tr>
+                            <tr class="cursor-pointer hover:bg-gray-50" onclick="window.location='{{ route('admin.materi.modul.index', $materi->id_materi) }}'">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                     {{ $materi->id_materi }}
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-normal text-sm text-gray-800 break-words font-medium">
-                                    <a href="{{ route('admin.materi.modul.index', $materi->id_materi) }}" class="text-indigo-600 hover:text-indigo-900 font-bold">
-                                        {{ $materi->nama_materi }}
-                                    </a>
+                                    {{ $materi->nama_materi }}
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-normal text-sm text-gray-700 break-words max-w-sm">
@@ -109,16 +109,16 @@
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <a href="{{ route('admin.materi.modul.index', $materi->id_materi) }}" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200">
                                         {{ $materi->moduls_count }}
-                                    </a>
+                                    </span>
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ \Carbon\Carbon::parse($materi->created_at)->format('d/m/Y') }}
                                 </td>
                                 
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center" onclick="event.stopPropagation()">
                                     <a href="{{ route('admin.materi.edit', $materi->id_materi) }}" class="text-indigo-600 hover:text-indigo-900 font-medium mr-3">
                                         Edit
                                     </a>

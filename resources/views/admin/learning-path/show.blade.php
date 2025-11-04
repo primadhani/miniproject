@@ -69,19 +69,23 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="sortable-list">
                         @forelse ($pathMateris as $materi)
-                            <tr class="sortable-item" data-id="{{ $materi->id_materi }}">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center drag-handle cursor-move">
+                            <tr class="sortable-item cursor-pointer hover:bg-gray-50" data-id="{{ $materi->id_materi }}" 
+                                onclick="window.location='{{ route('admin.materi.edit', $materi->id_materi) }}'">
+                                
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center drag-handle cursor-move"
+                                    onclick="event.stopPropagation()">
                                     {{ $materi->pivot->urutan }}
                                 </td>
+                                
                                 <td class="px-6 py-4 whitespace-normal text-sm text-gray-800 break-words font-medium">
-                                    <a href="{{ route('admin.materi.edit', $materi->id_materi) }}" class="text-indigo-600 hover:text-indigo-900 font-bold">
-                                        {{ $materi->nama_materi }}
-                                    </a>
+                                    {{ $materi->nama_materi }}
                                 </td>
+                                
                                 <td class="px-6 py-4 whitespace-normal text-sm text-gray-700 break-words max-w-lg">
                                     {{ \Illuminate\Support\Str::limit($materi->deskripsi, 100, '...') }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                                
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center" onclick="event.stopPropagation()">
                                     <form action="{{ route('admin.learning-path.removeMateri', [$learningPath->id, $materi->id_materi]) }}" method="POST" class="inline-block" onsubmit="return confirm('Hapus materi ini dari Learning Path?');">
                                         @csrf
                                         @method('DELETE')
@@ -133,6 +137,7 @@
             function updateDisplayOrder() {
                 const items = sortableList.querySelectorAll('.sortable-item');
                 items.forEach((item, index) => {
+                    // Update the visible order number
                     item.querySelector('.drag-handle').textContent = index + 1; 
                 });
             }
@@ -165,7 +170,6 @@
                     body: JSON.stringify({ order: newOrder })
                 })
                 .then(response => {
-                    // Penanganan Error Kritis: Mendeteksi jika respons adalah HTML (redirect/error)
                     const contentType = response.headers.get("content-type");
                     
                     if (!response.ok) {

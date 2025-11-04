@@ -34,7 +34,8 @@ class MateriController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.materi', compact('materis', 'sortColumn', 'sortDirection', 'searchQuery'));
+        // UPDATE PATH VIEW: dari admin.materi menjadi admin.materi.index
+        return view('admin.materi.index', compact('materis', 'sortColumn', 'sortDirection', 'searchQuery'));
     }
 
     /**
@@ -42,7 +43,8 @@ class MateriController extends Controller
      */
     public function create()
     {
-        return view('admin.materi-create');
+        // UPDATE PATH VIEW: dari admin.materi-create menjadi admin.materi.create
+        return view('admin.materi.create');
     }
 
     /**
@@ -68,7 +70,8 @@ class MateriController extends Controller
      */
     public function edit(Materi $materi)
     {
-        return view('admin.materi-edit', compact('materi'));
+        // UPDATE PATH VIEW: dari admin.materi-edit menjadi admin.materi.edit
+        return view('admin.materi.edit', compact('materi'));
     }
 
     /**
