@@ -50,8 +50,14 @@
                                     <svg class="w-5 h-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                    Deadline belajar untuk seluruh kelas bisa dilihat pada: 
-                                    <a href="#" class="text-blue-600 hover:underline ml-1">Timeline Program</a>.
+                                    @if (isset($learningPath->deadline_token))
+                                        Batas akhir belajar: 
+                                        {{-- Tanggal kadaluarsa token, di-format --}}
+                                        <span class="font-semibold text-red-600 ml-1">{{ \Carbon\Carbon::parse($learningPath->deadline_token)->format('d F Y') }}</span>
+                                    @else
+                                        Deadline belajar untuk seluruh kelas bisa dilihat pada: 
+                                        <a href="#" class="text-blue-600 hover:underline ml-1">Timeline Program</a>.
+                                    @endif
                                 </p>
                             </div>
 
