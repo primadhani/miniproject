@@ -146,43 +146,51 @@ class LearningPathController extends Controller
      * @return \Illuminate\View\View
      */
     public function koridorIndex(Materi $materi)
-    {
-        $user = Auth::user();
-        $learningPath = $materi->learningPaths()->first(); 
-        
-        $totalBacaan = 0;
-        $completedBacaanCount = 0;
+{
+    $user = Auth::user();
+    $learningPath = $materi->learningPaths()->first(); 
+    
+    $totalBacaan = 0;
+    $completedBacaanCount = 0;
 
-        // Mendapatkan semua Modul dan Bacaan di Materi ini
-        $materi->load('moduls.bacaan');
-        
-        if ($materi->moduls->isNotEmpty()) {
-            foreach ($materi->moduls as $modul) {
-                $totalBacaan += $modul->bacaan->count();
-            }
+    // Mendapatkan semua Modul dan Bacaan di Materi ini
+    $materi->load('moduls.bacaan');
+    
+    if ($materi->moduls->isNotEmpty()) {
+        foreach ($materi->moduls as $modul) {
+            $totalBacaan += $modul->bacaan->count();
         }
-        
-        if ($totalBacaan > 0 && $user) {
-            // Perbaikan: Mengubah 'materi_id' menjadi 'id_materi'
-            $completedIds = $user->completedBacaan()
-                ->whereHas('modul', function ($query) use ($materi) {
-                    $query->where('id_materi', $materi->id_materi); // <--- PERBAIKAN DI SINI
-                })
-                ->pluck('bacaan_id')
-                ->toArray();
-                
-            $completedBacaanCount = count($completedIds);
-            $progressPercentage = round(($completedBacaanCount / $totalBacaan) * 100);
-        } else {
-            $progressPercentage = 0;
-        }
-
-        return view('user.koridor', [
-            'materi' => $materi,
-            'learningPath' => $learningPath,
-            'progressPercentage' => $progressPercentage, // Nilai progress dikirim ke view
-        ]);
     }
+    
+    if ($totalBacaan > 0 && $user) {
+        // Perbaikan: Mengubah 'materi_id' menjadi 'id_materi'
+        $completedIds = $user->completedBacaan()
+            ->whereHas('modul', function ($query) use ($materi) {
+                $query->where('id_materi', $materi->id_materi); // <--- PERBAIKAN DI SINI
+            })
+            ->pluck('bacaan_id')
+            ->toArray();
+            
+        $completedBacaanCount = count($completedIds);
+        
+        // --- PERBAIKAN UTAMA UNTUK MENJAMIN 100% PROGRES ---
+        if ($completedBacaanCount >= $totalBacaan) {
+            $progressPercentage = 100;
+        } else {
+            $progressPercentage = round(($completedBacaanCount / $totalBacaan) * 100);
+        }
+        // ---------------------------------------------------
+        
+    } else {
+        $progressPercentage = 0;
+    }
+
+    return view('user.koridor', [
+        'materi' => $materi,
+        'learningPath' => $learningPath,
+        'progressPercentage' => $progressPercentage, // Nilai progress dikirim ke view
+    ]);
+}
     
     /**
      * FUNGSI DETAIL MATERI: Menampilkan detail materi (user/learning-path/show.blade.php).

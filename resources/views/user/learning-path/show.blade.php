@@ -160,10 +160,11 @@
                 }
 
                 // Tombol Selanjutnya dinonaktifkan jika ini adalah bacaan terakhir
-                if (currentBacaanIndex >= allBacaan.length - 1) {
-                    nextButton.setAttribute('disabled', 'disabled');
-                    nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+                if (currentBacaanIndex === -1) { 
+                nextButton.setAttribute('disabled', 'disabled');
+                nextButton.classList.add('opacity-50', 'cursor-not-allowed');
                 } else {
+                    // Selalu aktifkan tombol 'Selanjutnya', bahkan di item terakhir, untuk memicu goToNext.
                     nextButton.removeAttribute('disabled');
                     nextButton.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
@@ -251,25 +252,40 @@
              * Navigasi ke bacaan berikutnya (DIPERBARUI untuk progress)
              */
             function goToNext() {
-                if (currentBacaanIndex > -1 && currentBacaanIndex < allBacaan.length) {
-                    // 1. Ambil ID bacaan saat ini (yang akan diselesaikan)
-                    const currentBacaanId = allBacaan[currentBacaanIndex].id;
-                    
-                    // 2. Panggil AJAX untuk menandai selesai
-                    markAsComplete(currentBacaanId); 
+            if (currentBacaanIndex > -1 && currentBacaanIndex < allBacaan.length) {
+                // Menonaktifkan tombol sementara untuk mencegah klik ganda saat proses AJAX
+                nextButton.setAttribute('disabled', 'disabled');
+                prevButton.setAttribute('disabled', 'disabled'); 
 
-                    // 3. Cek apakah ada bacaan berikutnya
-                    if (currentBacaanIndex < allBacaan.length - 1) {
-                        const nextIndex = currentBacaanIndex + 1;
-                        displayBacaan(allBacaan[nextIndex]);
-                    } else {
-                        // INI BAGIAN LOGIKA UNTUK REDIRECT KE KORIDOR
-                        alert('Selamat! Anda telah menyelesaikan semua bacaan di Materi ini. Mengarahkan ke halaman Koridor.');
-                        // Menggunakan nama rute user.koridor.index untuk kembali ke halaman koridor materi ini
-                        window.location.href = "{{ route('user.koridor.index', $materi->id_materi) }}";
-                    }
-                }
+                // 1. Ambil ID bacaan saat ini (yang akan diselesaikan)
+                const currentBacaanId = allBacaan[currentBacaanIndex].id;
+                const isLastBacaan = currentBacaanIndex === allBacaan.length - 1;
+
+                // 2. Panggil AJAX untuk menandai selesai dan tunggu hasilnya
+                markAsComplete(currentBacaanId)
+                    .then(data => {
+                        console.log('Mark complete success:', data);
+
+                        // Setelah berhasil, lakukan navigasi/redirect
+                        if (isLastBacaan) {
+                            // REDIRECT KE KORIDOR
+                            alert('Selamat! Anda telah menyelesaikan semua bacaan di Materi ini. Mengarahkan ke halaman Koridor.');
+                            // Menggunakan nama rute user.koridor.index untuk kembali ke halaman koridor materi ini
+                            window.location.href = "{{ route('user.koridor.index', $materi->id_materi) }}";
+                        } else {
+                            // Pindah ke bacaan berikutnya
+                            const nextIndex = currentBacaanIndex + 1;
+                            displayBacaan(allBacaan[nextIndex]);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Mark complete error:', error);
+                        alert('Gagal menandai bacaan selesai. Silakan coba lagi. Lihat konsol untuk detail error.');
+                        // Aktifkan kembali tombol jika gagal
+                        updateNavigationButtons(); 
+                    });
             }
+        }
 
             /**
              * Navigasi ke bacaan sebelumnya
