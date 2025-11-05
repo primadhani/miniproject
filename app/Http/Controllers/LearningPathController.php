@@ -150,38 +150,29 @@ class LearningPathController extends Controller
         $user = Auth::user();
         $learningPath = $materi->learningPaths()->first(); 
         
-        // 1. Muat Modul dan Bacaan
+        $totalBacaan = 0;
+        $completedBacaanCount = 0;
+
+        // Mendapatkan semua Modul dan Bacaan di Materi ini
         $materi->load('moduls.bacaan');
         
-        // Kumpulkan SEMUA ID Bacaan yang ada di Materi ini (Denominator)
-        $allBacaanIds = collect();
         if ($materi->moduls->isNotEmpty()) {
             foreach ($materi->moduls as $modul) {
-                // Mengambil Primary Key dari tabel bacaan, yaitu 'id_bacaan'
-                $allBacaanIds = $allBacaanIds->merge($modul->bacaan->pluck('id_bacaan')); 
+                $totalBacaan += $modul->bacaan->count();
             }
         }
         
-        $totalBacaan = $allBacaanIds->count();
-        $completedBacaanCount = 0;
-
         if ($totalBacaan > 0 && $user) {
-            
-            // 2. SOLUSI KRUSIAL: Ambil ID yang telah diselesaikan secara eksplisit dari tabel pivot
-            // Ini memastikan kita mengambil data 'bacaan_id' (Foreign Key) dari tabel 'user_bacaan'.
-            $userCompletedIds = DB::table('user_bacaan')
-                                ->where('user_id', $user->id)
-                                ->pluck('bacaan_id'); // Pluck kolom FK dari tabel pivot
-            
-            // 3. Bandingkan: Intersect memastikan kita hanya menghitung ID yang diselesaikan 
-            // DAN ada di materi yang sedang dilihat.
-            $completedInMateri = $userCompletedIds->intersect($allBacaanIds);
-            
-            $completedBacaanCount = $completedInMateri->count();
-            
-            // Pastikan perhitungan progress aman dari pembagian nol
+            // Perbaikan: Mengubah 'materi_id' menjadi 'id_materi'
+            $completedIds = $user->completedBacaan()
+                ->whereHas('modul', function ($query) use ($materi) {
+                    $query->where('id_materi', $materi->id_materi); // <--- PERBAIKAN DI SINI
+                })
+                ->pluck('bacaan_id')
+                ->toArray();
+                
+            $completedBacaanCount = count($completedIds);
             $progressPercentage = round(($completedBacaanCount / $totalBacaan) * 100);
-            
         } else {
             $progressPercentage = 0;
         }
@@ -189,7 +180,7 @@ class LearningPathController extends Controller
         return view('user.koridor', [
             'materi' => $materi,
             'learningPath' => $learningPath,
-            'progressPercentage' => $progressPercentage,
+            'progressPercentage' => $progressPercentage, // Nilai progress dikirim ke view
         ]);
     }
     
