@@ -215,60 +215,67 @@
              * FUNGSI BARU: Mark current bacaan as complete via AJAX
              */
             function markAsComplete(bacaanId) {
-                if (!csrfToken) {
-                    console.error('CSRF Token tidak ditemukan. Gagal mengirim permintaan progres.');
-                    return;
-                }
-                // Menggunakan route helper yang akan di-resolve oleh Blade
-                // Catatan: Karena route('user.bacaan.complete', ['bacaan' => 'PLACEHOLDER']) tidak bekerja di JavaScript, 
-                // kita menggunakan URL string pengganti dan route yang sudah didefinisikan di PHP.
-                const url = `{{ url('progress/complete') }}/${bacaanId}`;
+    if (!csrfToken) {
+        console.error('CSRF Token tidak ditemukan. Gagal mengirim permintaan progres.');
+        // Mengembalikan Promise yang ditolak jika token tidak ada
+        return Promise.reject(new Error('CSRF Token tidak ditemukan.')); 
+    }
+    const url = `{{ url('progress/complete') }}/${bacaanId}`;
 
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        console.warn('Gagal menandai selesai:', data.message);
-                    } else {
-                        // Opsional: berikan feedback kecil di UI
-                        // console.log('Progres berhasil disimpan.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error saat menandai selesai:', error);
-                });
-            }
+    return fetch(url, { // <-- Pastikan fetch dikembalikan
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            // Melemparkan error jika status HTTP bukan 2xx
+            throw new Error(`Gagal menandai selesai. Status HTTP: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) {
+            // Melemparkan error jika respons server menyatakan kegagalan
+            throw new Error(data.message || 'Gagal menandai selesai dari server.');
+        }
+        // Berhasil
+        return data;
+    });
+}
             
             /**
              * Navigasi ke bacaan berikutnya (DIPERBARUI untuk progress)
              */
             function goToNext() {
-                if (currentBacaanIndex > -1 && currentBacaanIndex < allBacaan.length) {
-                    // 1. Ambil ID bacaan saat ini (yang akan diselesaikan)
-                    const currentBacaanId = allBacaan[currentBacaanIndex].id;
-                    
-                    // 2. Panggil AJAX untuk menandai selesai
-                    markAsComplete(currentBacaanId); 
-
-                    // 3. Cek apakah ada bacaan berikutnya
-                    if (currentBacaanIndex < allBacaan.length - 1) {
-                        const nextIndex = currentBacaanIndex + 1;
-                        displayBacaan(allBacaan[nextIndex]);
-                    } else {
-                        // INI BAGIAN LOGIKA UNTUK REDIRECT KE KORIDOR
-                        alert('Selamat! Anda telah menyelesaikan semua bacaan di Materi ini. Mengarahkan ke halaman Koridor.');
-                        // Menggunakan nama rute user.koridor.index untuk kembali ke halaman koridor materi ini
-                        window.location.href = "{{ route('user.koridor.index', $materi->id_materi) }}";
-                    }
-                }
+    if (currentBacaanIndex > -1 && currentBacaanIndex < allBacaan.length) {
+        // 1. Ambil ID bacaan saat ini (yang akan diselesaikan)
+        const currentBacaanId = allBacaan[currentBacaanIndex].id;
+        
+        // 2. Panggil AJAX dan gunakan .then() untuk menunggu hasilnya
+        markAsComplete(currentBacaanId) 
+        .then(() => {
+            // 3. Logika yang dijalankan setelah penandaan selesai berhasil
+            if (currentBacaanIndex < allBacaan.length - 1) {
+                const nextIndex = currentBacaanIndex + 1;
+                displayBacaan(allBacaan[nextIndex]);
+            } else {
+                // INI BAGIAN LOGIKA UNTUK REDIRECT KE KORIDOR (Dijalankan hanya setelah AJAX sukses)
+                alert('Selamat! Anda telah menyelesaikan semua bacaan di Materi ini. Mengarahkan ke halaman Koridor.');
+                // Menggunakan nama rute user.koridor.index untuk kembali ke halaman koridor materi ini
+                window.location.href = "{{ route('user.koridor.index', $materi->id_materi) }}";
             }
+        })
+        .catch(error => {
+            // Tangani error jika markAsComplete gagal
+            console.error('Navigasi Gagal karena error saat menandai selesai:', error);
+            alert('Gagal menyelesaikan bacaan. Silakan coba muat ulang halaman. Pesan Error: ' + (error.message || 'Terjadi kesalahan tidak dikenal.'));
+        });
+    }
+}
 
             /**
              * Navigasi ke bacaan sebelumnya
