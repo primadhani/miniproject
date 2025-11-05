@@ -6,35 +6,79 @@
     </x-slot>
 
     {{-- KONTEN UTAMA DENGAN SIDEBAR --}}
-    <div class="flex min-h-screen bg-gray-100">
+    {{-- Inisialisasi Alpine.js state untuk sidebar --}}
+    <div class="flex min-h-screen bg-gray-100" x-data="{ sidebarOpen: true }">
 
-        {{-- 1. SIDEBAR (Fixed Width) --}}
-        <div class="w-64 bg-white border-r border-gray-200 shadow-xl p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-6 border-b pb-2">Navigasi Utama</h3>
+        {{-- 1. SIDEBAR (Width Toggled) --}}
+        <div 
+            class="bg-white border-r border-gray-200 shadow-xl p-6 transition-all duration-300 ease-in-out flex flex-col justify-start" 
+            :class="sidebarOpen ? 'w-64' : 'w-16'"
+        >
             
+            {{-- Header Sidebar dengan Tombol Toggle --}}
+            <div class="flex items-center mb-6 border-b pb-2" :class="sidebarOpen ? 'justify-between' : 'justify-center'">
+                
+                {{-- Judul hanya tampil saat terbuka --}}
+                <h3 
+                    class="text-lg font-bold text-gray-800 truncate"
+                    :class="!sidebarOpen && 'hidden'"
+                >
+                    Navigasi Utama
+                </h3>
+                
+                {{-- Tombol Toggle --}}
+                <button 
+                    @click="sidebarOpen = !sidebarOpen" 
+                    class="p-1 rounded-full text-gray-500 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none flex-shrink-0"
+                    title="Toggle Sidebar"
+                >
+                    {{-- Icon Panah Kiri/Kanan (Animasi Rotasi) --}}
+                    <svg 
+                        class="w-6 h-6 transform transition-transform duration-300" 
+                        :class="sidebarOpen ? 'rotate-0' : 'rotate-180'" 
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8m-11 3h12a2 2 0 002-2V8a2 2 0 00-2-2H8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            {{-- Navigasi Links --}}
             <nav class="space-y-2">
                 
-                {{-- Link Dashboard --}}
-                <a href="#" class="flex items-center p-3 text-sm font-semibold text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition duration-150">
-                    Progres Belajar
-                </a>
+                @php
+                    $navItems = [
+                        ['text' => 'Progres Belajar', 'route' => '#', 'icon' => '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v14m-6 2l6-3m-6 0V5"></path></svg>'],
+                        ['text' => 'Runtutan Belajar', 'route' => '#', 'icon' => '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>'],
+                        ['text' => 'Langganan', 'route' => '#', 'icon' => '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zM9 16h6m-6 0a2 2 0 00-2 2v2M7 16a2 2 0 00-2 2v2"></path></svg>']
+                    ];
+                @endphp
 
-                {{-- Link Akademi (Aktif) --}}
-                <a href="#" class="flex items-center p-3 text-sm font-semibold text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition duration-150">
-                    Runtutan Belajar
-                </a>
-
-                {{-- Link Profil --}}
-                <a href="#" class="flex items-center p-3 text-sm font-semibold text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition duration-150">
-                    Langganan
-                </a>
+                @foreach ($navItems as $item)
+                    <a 
+                        href="{{ $item['route'] }}" 
+                        class="flex items-center p-3 text-sm font-semibold text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition duration-150"
+                        :class="!sidebarOpen && 'justify-center'"
+                        title="{{ $item['text'] }}"
+                    >
+                        {{-- Icon --}}
+                        <span class="w-6 h-6 flex-shrink-0" :class="sidebarOpen && 'mr-3'">
+                            {!! $item['icon'] !!}
+                        </span>
+                        
+                        {{-- Teks (disembunyikan saat tertutup) --}}
+                        <span :class="!sidebarOpen && 'hidden'">
+                            {{ $item['text'] }}
+                        </span>
+                    </a>
+                @endforeach
 
             </nav>
         </div>
 
         {{-- 2. MAIN CONTENT --}}
         <main class="flex-1 p-4 sm:p-6 lg:p-8">
-            <div class="max-w-full mx-auto">
+            <div class="max-w-full"> {{-- *** PERBAIKAN: mx-auto DIHAPUS agar konten melebar penuh *** --}}
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                         
@@ -42,7 +86,6 @@
                             {{-- Header Learning Path --}}
                             <div class="mb-6">
                                 <div class="flex items-center mb-3">
-                                    
                                     <h3 class="text-2xl font-bold text-gray-800">{{ $learningPath->nama_path }}</h3>
                                 </div>
                                 
@@ -52,7 +95,6 @@
                                     </svg>
                                     @if (isset($learningPath->deadline_token))
                                         Batas akhir belajar: 
-                                        {{-- Tanggal kadaluarsa token, di-format --}}
                                         <span class="font-semibold text-red-600 ml-1">{{ \Carbon\Carbon::parse($learningPath->deadline_token)->format('d F Y') }}</span>
                                     @else
                                         Deadline belajar untuk seluruh kelas bisa dilihat pada: 
@@ -73,7 +115,8 @@
                                             
                                             {{-- Konten Materi --}}
                                             <div class="flex-1">
-                                                <a href="{{ route('user.materi.show', $materi->id_materi) }}" class="text-base text-gray-800 hover:text-blue-600 transition duration-150">
+                                                {{-- BARIS INI DIUBAH: Menggunakan nama rute baru 'user.koridor.materi.show' --}}
+                                                <a href="{{ route('user.koridor.index', $materi->id_materi) }}" class="text-base text-gray-800 hover:text-blue-600 transition duration-150">
                                                     {{ $materi->nama_materi }}
                                                 </a>
                                             </div>

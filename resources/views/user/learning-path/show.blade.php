@@ -1,8 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Materi') }}: {{ $materi->nama_materi }}
+            {{ __('Ruang Pembelajaran') }}
         </h2>
+        {{-- BREADCRUMB BARU --}}
+        <div class="text-sm mt-1">
+            <a href="{{ route('user.academy') }}" class="text-indigo-600 hover:text-indigo-900">{{ __('Akademi') }}</a>
+            {{-- Link kembali ke Koridor perantara --}}
+            / <a href="{{ route('user.koridor.index', $materi->id_materi) }}" class="text-indigo-600 hover:text-indigo-900">{{ $materi->nama_materi }}</a>
+            / Daftar Modul
+        </div>
+        {{-- AKHIR BREADCRUMB BARU --}}
     </x-slot>
 
     <div class="py-12">
@@ -97,6 +105,11 @@
                 return;
             }
 
+            // Ambil token CSRF untuk AJAX
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+
             // Kumpulkan semua data bacaan dalam array untuk navigasi sekuensial
             const allBacaan = Array.from(links).map((link, index) => ({
                 index: index,
@@ -180,13 +193,14 @@
                 if (konten) {
                     const finalKonten = String(konten);
                     
-                    // PERBAIKAN KEAMANAN: Escape HTML untuk Pencegahan XSS
+                    // Mengganti \n dengan <br> dan memastikan konten aman
                     const tempElement = document.createElement('div');
-                    tempElement.textContent = finalKonten;
-                    const safeKonten = tempElement.innerHTML; 
+                    // Menggunakan textContent untuk menghindari injeksi HTML dari JSON.parse
+                    tempElement.textContent = finalKonten; 
+                    const safeKonten = tempElement.innerHTML.replace(/\n/g, '<br>');
                     
                     // Tampilkan konten yang sudah aman.
-                    bacaanKontenElement.innerHTML = safeKonten.replace(/\n/g, '<br>');
+                    bacaanKontenElement.innerHTML = safeKonten;
                 } else {
                      bacaanKontenElement.innerHTML = '<p class="text-gray-500 italic">Konten bacaan ini kosong atau tidak dapat dimuat.</p>';
                 }
@@ -196,14 +210,63 @@
                     bacaanContainer.scrollTop = 0;
                 }
             }
+
+            /**
+             * FUNGSI BARU: Mark current bacaan as complete via AJAX
+             */
+            function markAsComplete(bacaanId) {
+                if (!csrfToken) {
+                    console.error('CSRF Token tidak ditemukan. Gagal mengirim permintaan progres.');
+                    return;
+                }
+                // Menggunakan route helper yang akan di-resolve oleh Blade
+                // Catatan: Karena route('user.bacaan.complete', ['bacaan' => 'PLACEHOLDER']) tidak bekerja di JavaScript, 
+                // kita menggunakan URL string pengganti dan route yang sudah didefinisikan di PHP.
+                const url = `{{ url('progress/complete') }}/${bacaanId}`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        console.warn('Gagal menandai selesai:', data.message);
+                    } else {
+                        // Opsional: berikan feedback kecil di UI
+                        // console.log('Progres berhasil disimpan.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saat menandai selesai:', error);
+                });
+            }
             
             /**
-             * Navigasi ke bacaan berikutnya
+             * Navigasi ke bacaan berikutnya (DIPERBARUI untuk progress)
              */
             function goToNext() {
-                if (currentBacaanIndex < allBacaan.length - 1) {
-                    const nextIndex = currentBacaanIndex + 1;
-                    displayBacaan(allBacaan[nextIndex]);
+                if (currentBacaanIndex > -1 && currentBacaanIndex < allBacaan.length) {
+                    // 1. Ambil ID bacaan saat ini (yang akan diselesaikan)
+                    const currentBacaanId = allBacaan[currentBacaanIndex].id;
+                    
+                    // 2. Panggil AJAX untuk menandai selesai
+                    markAsComplete(currentBacaanId); 
+
+                    // 3. Cek apakah ada bacaan berikutnya
+                    if (currentBacaanIndex < allBacaan.length - 1) {
+                        const nextIndex = currentBacaanIndex + 1;
+                        displayBacaan(allBacaan[nextIndex]);
+                    } else {
+                        // INI BAGIAN LOGIKA UNTUK REDIRECT KE KORIDOR
+                        alert('Selamat! Anda telah menyelesaikan semua bacaan di Materi ini. Mengarahkan ke halaman Koridor.');
+                        // Menggunakan nama rute user.koridor.index untuk kembali ke halaman koridor materi ini
+                        window.location.href = "{{ route('user.koridor.index', $materi->id_materi) }}";
+                    }
                 }
             }
 

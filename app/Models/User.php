@@ -67,4 +67,14 @@ class User extends Authenticatable
             ->flatten()
             ->unique('id');
     }
+
+    public function completedBacaan(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Bacaan::class,
+            'user_bacaan', 
+            'user_id', 
+            'bacaan_id' // Ini menunjuk ke kolom bacaan_id di tabel pivot
+        )->withTimestamps();
+    }
 }

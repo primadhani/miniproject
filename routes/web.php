@@ -36,8 +36,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/academy/learning-path/{learning_path}', [LearningPathController::class, 'show'])
         ->name('user.learning-path.show');
 
+    // PERUBAHAN 1: Rute DETAIL MATERI dikembalikan ke nama awal (atau disesuaikan)
+    // Menggunakan showMateri di LearningPathController, tetapi diubah namanya.
     Route::get('/materi/{materi}', [LearningPathController::class, 'showMateri'])
-     ->name('user.materi.show');
+     ->name('user.materi.show'); // Nama rute dikembalikan
+
+    // PERUBAHAN 2: Rute KORIDOR (Halaman Perantara)
+    // Akan menggunakan method baru (atau method yang sudah ada)
+    Route::get('/koridor/{materi}', [LearningPathController::class, 'koridorIndex']) // Menggunakan method baru: koridorIndex
+        ->name('user.koridor.index');
+
+    // PERUBAHAN 3: Rute untuk API Penandaan Bacaan Selesai (dipanggil via AJAX)
+    Route::post('/progress/complete/{bacaan}', [LearningPathController::class, 'markBacaanComplete'])
+        ->name('user.bacaan.complete');
+
+
+
+
 
     // Event (Tempat Redeem)
     Route::get('/event', [RedeemController::class, 'eventIndex'])

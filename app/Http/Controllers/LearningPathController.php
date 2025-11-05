@@ -7,6 +7,8 @@ use App\Models\Materi;
 use App\Models\Bacaan; // PENTING: Import model Bacaan
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth; // DIPERLUKAN UNTUK MENGAMBIL USER
+use Illuminate\Support\Facades\Log; // DIPERLUKAN UNTUK LOGGING ERROR
 use App\Http\Controllers\Controller; 
 
 class LearningPathController extends Controller
@@ -133,7 +135,60 @@ class LearningPathController extends Controller
         }
     }
 
-    // ⭐ FUNGSI BARU UNTUK TAMPILAN AKADEMI USER (DETAIL MATERI) ⭐
+    // =========================================================
+    // FUNGSI UNTUK USER (KORIDOR & DETAIL MATERI)
+    // =========================================================
+    
+    /**
+     * FUNGSI KORIDOR: Menampilkan halaman perantara Koridor (user/koridor.blade.php).
+     * Termasuk perhitungan progress.
+     * @param  \App\Models\Materi  $materi
+     * @return \Illuminate\View\View
+     */
+    public function koridorIndex(Materi $materi)
+    {
+        $user = Auth::user();
+        $learningPath = $materi->learningPaths()->first(); 
+        
+        $totalBacaan = 0;
+        $completedBacaanCount = 0;
+
+        // Mendapatkan semua Modul dan Bacaan di Materi ini
+        $materi->load('moduls.bacaan');
+        
+        if ($materi->moduls->isNotEmpty()) {
+            foreach ($materi->moduls as $modul) {
+                $totalBacaan += $modul->bacaan->count();
+            }
+        }
+        
+        if ($totalBacaan > 0 && $user) {
+            // Perbaikan: Mengubah 'materi_id' menjadi 'id_materi'
+            $completedIds = $user->completedBacaan()
+                ->whereHas('modul', function ($query) use ($materi) {
+                    $query->where('id_materi', $materi->id_materi); // <--- PERBAIKAN DI SINI
+                })
+                ->pluck('bacaan_id')
+                ->toArray();
+                
+            $completedBacaanCount = count($completedIds);
+            $progressPercentage = round(($completedBacaanCount / $totalBacaan) * 100);
+        } else {
+            $progressPercentage = 0;
+        }
+
+        return view('user.koridor', [
+            'materi' => $materi,
+            'learningPath' => $learningPath,
+            'progressPercentage' => $progressPercentage, // Nilai progress dikirim ke view
+        ]);
+    }
+    
+    /**
+     * FUNGSI DETAIL MATERI: Menampilkan detail materi (user/learning-path/show.blade.php).
+     * @param  \App\Models\Materi  $materi
+     * @return \Illuminate\View\View
+     */
     public function showMateri(Materi $materi) 
     {
         // Muat Modul dan nested Bacaan (Eager Loading)
@@ -146,18 +201,49 @@ class LearningPathController extends Controller
         }]);
 
         $firstBacaan = null;
+        $allBacaanList = collect();
         
-        // Cari Bacaan pertama dari Modul pertama yang memiliki bacaan
+        // Cari Bacaan pertama dan kumpulkan semua bacaan untuk JavaScript Navigasi
         if ($materi->moduls->isNotEmpty()) {
             foreach ($materi->moduls as $modul) {
                 if ($modul->bacaan->isNotEmpty()) {
-                    $firstBacaan = $modul->bacaan->first();
-                    break;
+                    $allBacaanList = $allBacaanList->merge($modul->bacaan);
                 }
             }
+            $firstBacaan = $allBacaanList->first(); // Bacaan yang pertama kali akan ditampilkan
         } 
         
-        // Mengarahkan ke view user
-        return view('user.learning-path.show', compact('materi', 'firstBacaan'));
+        $learningPath = $materi->learningPaths()->first();
+
+        return view('user.learning-path.show', [
+            'materi' => $materi, 
+            'moduls' => $materi->moduls, // Mengirimkan semua modul dan bacaan
+            'initialBacaan' => $firstBacaan, // Bacaan awal yang akan ditampilkan
+            'learningPath' => $learningPath,
+        ]);
+    }
+
+    /**
+     * FUNGSI API: Menandai Bacaan tertentu sebagai selesai.
+     * Dipanggil via AJAX dari tombol "Selanjutnya" di halaman detail materi.
+     * @param  \App\Models\Bacaan  $bacaan
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function markBacaanComplete(Bacaan $bacaan)
+    {
+        $user = Auth::user();
+        if (!$user) {
+             return response()->json(['message' => 'Unauthorized.', 'success' => false], 401);
+        }
+        
+        try {
+            // Asumsi: Model User memiliki relasi completedBacaan() (BelongsToMany ke Bacaan)
+            $user->completedBacaan()->syncWithoutDetaching([$bacaan->id_bacaan]);
+            
+            return response()->json(['message' => 'Bacaan berhasil ditandai selesai.', 'success' => true]);
+        } catch (\Exception $e) {
+            Log::error('Error completing bacaan: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal menandai selesai. Mohon cek model relasi Anda.', 'success' => false], 500);
+        }
     }
 }
