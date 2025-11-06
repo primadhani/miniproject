@@ -27,32 +27,38 @@ Route::middleware('auth')->group(function () {
 
     // --- Rute User ---
     
-    // Academy
-    Route::get('/academy', [AcademyController::class, 'index'])
-        ->name('user.academy'); 
+    // Grouping rute Akademi (halaman utama dan Learning Path Show)
+    Route::prefix('academy')->group(function () {
+        
+        // 1. Halaman Index Akademi (View: resources/views/user/academy/progres-belajar/index.blade.php)
+        Route::get('/', [AcademyController::class, 'index'])
+            ->name('user.academy'); 
 
-    // Learning Path Show untuk User (BARU)
-    // Menggunakan LearningPathController@show (Jika Anda sudah memiliki metode ini)
-    Route::get('/academy/learning-path/{learning_path}', [LearningPathController::class, 'show'])
-        ->name('user.learning-path.show');
+        // 2. Learning Path Show untuk User (View: resources/views/user/learning-path/show.blade.php - dianggap di luar folder progres-belajar)
+        // Rute lengkap: /academy/learning-path/{learning_path}
+        Route::get('/learning-path/{learning_path}', [LearningPathController::class, 'show'])
+            ->name('user.learning-path.show');
+    });
 
-    // PERUBAHAN 1: Rute DETAIL MATERI dikembalikan ke nama awal (atau disesuaikan)
-    // Menggunakan showMateri di LearningPathController, tetapi diubah namanya.
-    Route::get('/materi/{materi}', [LearningPathController::class, 'showMateri'])
-     ->name('user.materi.show'); // Nama rute dikembalikan
-
-    // PERUBAHAN 2: Rute KORIDOR (Halaman Perantara)
-    // Akan menggunakan method baru (atau method yang sudah ada)
-    Route::get('/koridor/{materi}', [LearningPathController::class, 'koridorIndex']) // Menggunakan method baru: koridorIndex
+    // Rute Koridor dan Materi (menggunakan URL /koridor dan /materi)
+    
+    // PERUBAHAN 2: Rute KORIDOR (Halaman Perantara - View: resources/views/user/academy/progres-belajar/koridor.blade.php)
+    Route::get('/koridor/{materi}', [LearningPathController::class, 'koridorIndex'])
         ->name('user.koridor.index');
+
+    // PERUBAHAN 1: Rute DETAIL MATERI (View: resources/views/user/academy/progres-belajar/show.blade.php)
+    Route::get('/materi/{materi}', [LearningPathController::class, 'showMateri'])
+     ->name('user.materi.show');
 
     // PERUBAHAN 3: Rute untuk API Penandaan Bacaan Selesai (dipanggil via AJAX)
     Route::post('/progress/complete/{bacaan}', [LearningPathController::class, 'markBacaanComplete'])
         ->name('user.bacaan.complete');
 
+    Route::view('/langganan', 'user.academy.langganan.index')
+            ->name('user.academy.langganan');
 
-
-
+    Route::view('/runtutan-belajar', 'user.academy.runtutan-belajar.index')
+            ->name('user.academy.runtutan-belajar');
 
     // Event (Tempat Redeem)
     Route::get('/event', [RedeemController::class, 'eventIndex'])
