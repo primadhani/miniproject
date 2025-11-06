@@ -77,4 +77,6 @@ class User extends Authenticatable
             'bacaan_id' // Ini menunjuk ke kolom bacaan_id di tabel pivot
         )->withTimestamps();
     }
+    
+    
 }

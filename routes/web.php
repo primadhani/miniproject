@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::view('/langganan', 'user.academy.langganan.index')
             ->name('user.academy.langganan');
 
-    Route::view('/runtutan-belajar', 'user.academy.runtutan-belajar.index')
+    Route::get('/runtutan-belajar', [AcademyController::class, 'runtutanBelajar'])
             ->name('user.academy.runtutan-belajar');
 
     // Event (Tempat Redeem)
