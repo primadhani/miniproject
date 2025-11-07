@@ -10,6 +10,7 @@ use App\Http\Controllers\RedeemController;
 use App\Http\Controllers\AcademyController;
 use App\Http\Controllers\LearningPathController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\DashboardController;
 
 Route::view('/', 'welcome');
 
@@ -23,7 +24,7 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 Route::middleware('auth')->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard'); // <-- PERUBAHAN UTAMA
 
     // --- Rute User ---
     
@@ -60,20 +61,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/runtutan-belajar', [AcademyController::class, 'runtutanBelajar'])
             ->name('user.academy.runtutan-belajar');
 
-    // Event (Tempat Redeem)
-    Route::get('/event', [RedeemController::class, 'eventIndex'])
+    Route::view('/event', 'user.event.index')
         ->name('user.event');
 
-    // Redeem Token
-    Route::post('/redeem-token', [RedeemController::class, 'redeemToken'])
-        ->name('redeem.token');
-    
-    // Challenge
-    Route::view('/challenge', 'user.challenge')
+    Route::view('/challenge', 'user.challenge.index')
         ->name('user.challenge');
 
     // Job
-    Route::view('/job', 'user.job')
+    // PERBAIKAN: Mengubah nama view dari 'user.job' menjadi 'user.job.index'
+    Route::view('/job', 'user.job.index')
         ->name('user.job');
 });
 
