@@ -37,6 +37,7 @@
                 
             <div class="bg-white rounded-xl shadow-md p-6">
                 <h3 class="text-gray-700 font-semibold text-lg mb-4">
+                    <i class="ph ph-books"></i>
                     Learning Path
                 </h3>
                 
@@ -67,6 +68,7 @@
 
             <div class="bg-white rounded-xl shadow-md p-6">
                 <h3 class="text-gray-700 font-semibold text-lg mb-4">
+                    <i class="ph ph-book-open-text"></i>
                     Aktivitas Belajar
                 </h3>
                 <ul class="space-y-3">
@@ -87,4 +89,23 @@
 
         </div>
     </div>
+    
+    <footer class="footer pt-10 py-6">
+        <div class="row">
+            {{-- Kolom Kiri: Copyright --}}
+            <div class="col-lg-6 mb-2 mb-lg-0 text-center text-lg-left">
+                &copy; 2025 Dicoding Indonesia
+                <span class="px-1 text-muted">|</span>
+                Dicoding is a trademark of PT Presentologics.
+            </div>
+            
+            {{-- Kolom Kanan: Tautan Kebijakan --}}
+            <div class="col-lg-6 text-center text-lg-right">
+                <a href="https://www.dicoding.com/termsofuse" class="dcd-link">Terms</a>
+                <span class="mx-2 text-muted">•</span>
+                <a href="https://www.dicoding.com/privacy" class="dcd-link">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
 </x-app-layout>
