@@ -55,6 +55,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/progress/complete/{bacaan}', [LearningPathController::class, 'markBacaanComplete'])
         ->name('user.bacaan.complete');
 
+    Route::post('/token/redeem', [RedeemController::class, 'redeemToken'])
+        ->name('redeem.token');
+
     Route::view('/langganan', 'user.academy.langganan.index')
             ->name('user.academy.langganan');
 

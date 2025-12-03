@@ -23,7 +23,7 @@
                         Pilih paket langganan dan mulailah perjalanan Anda menjadi developer profesional.
                     </p>
                     {{-- Memastikan tombol mengarah ke rute user.academy.langganan --}}
-                    <a class="bg-gray-800 hover:bg-gray-900 text-white px-2 py-1 rounded-lg transition w-40 text-sm text-center">
+                    <a href="{{ route('user.academy.langganan') }}" class="bg-gray-800 hover:bg-gray-900 text-white px-2 py-1 rounded-lg transition w-40 text-sm text-center">
                         Langganan
                     </a>
                 </div>
