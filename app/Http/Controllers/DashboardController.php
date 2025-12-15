@@ -93,7 +93,7 @@ class DashboardController extends Controller
             return null;
         })->filter()->values();
 
-        return view('dashboard', [
+        return view('user.dashboard', [
             'learningPaths' => $learningPathsWithProgress,
             'recentMaterials' => $recentMaterials,
         ]);

@@ -42,9 +42,9 @@ new class extends Component
                         @endif
                     </x-nav-link>
 
-                    <x-nav-link :href="route('user.challenge')" :active="request()->routeIs('user.challenge')" wire:navigate class="relative">
-                        {{ __('Challenge') }}
-                        @if (request()->routeIs('user.challenge'))
+                    <x-nav-link :href="route('user.quiz')" :active="request()->routeIs('user.quiz')" wire:navigate class="relative">
+                        {{ __('Quiz') }}
+                        @if (request()->routeIs('user.quiz'))
                             <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
                         @endif
                     </x-nav-link>
@@ -109,8 +109,8 @@ new class extends Component
                 {{ __('Academy') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('user.challenge')" :active="request()->routeIs('user.challenge')" wire:navigate>
-                {{ __('Challenge') }}
+            <x-responsive-nav-link :href="route('user.quiz')" :active="request()->routeIs('user.quiz')" wire:navigate>
+                {{ __('Quiz') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('user.event')" :active="request()->routeIs('user.event')" wire:navigate>
