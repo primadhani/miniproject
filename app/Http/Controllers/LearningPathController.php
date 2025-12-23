@@ -185,7 +185,7 @@ class LearningPathController extends Controller
         $progressPercentage = 0;
     }
 
-    return view('user.academy.progres-belajar.koridor', [
+    return view('user.progres-belajar.koridor', [
         'materi' => $materi,
         'learningPath' => $learningPath,
         'progressPercentage' => $progressPercentage, // Nilai progress dikirim ke view
@@ -223,7 +223,7 @@ class LearningPathController extends Controller
         
         $learningPath = $materi->learningPaths()->first();
 
-        return view('user.academy.progres-belajar.show', [
+        return view('user.progres-belajar.show', [
             'materi' => $materi, 
             'moduls' => $materi->moduls, // Mengirimkan semua modul dan bacaan
             'initialBacaan' => $firstBacaan, // Bacaan awal yang akan ditampilkan

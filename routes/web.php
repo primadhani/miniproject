@@ -15,29 +15,27 @@ use App\Http\Controllers\DashboardController;
 // RUTE PUBLIK
 Route::view('/', 'landingPage');
 
-// RUTE OTENTIKASI DASAR (Livewire/Jetstream default views)
-Route::view('dashboard', 'user.dashboard') // <--- PERUBAHAN
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard.view');
-
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile.view');
-
 // RUTE PENGGUNA TEROTENTIKASI
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard'); // Controller harus me-return view('user.dashboard')
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::view('/profile', 'profile')->name('profile');
-    Route::view('/event', 'user.event.index')->name('user.event');
-    Route::view('/quiz', 'user.quiz.index')->name('user.quiz');
-    Route::view('/job', 'user.job.index')->name('user.job');
     
+    // Perubahan rute sesuai permintaan:
+    // Academy menuju ke Progres Belajar (Menggunakan index AcademyController)
+    Route::get('/proses-belajar', [AcademyController::class, 'index'])->name('user.proses-belajar');
+    
+    // Quiz diganti menjadi Runtutan Belajar
+    Route::get('/runtutan-belajar', [AcademyController::class, 'runtutanBelajar'])->name('user.runtutan-belajar');
+    
+    // Event menuju ke Langganan
+    Route::view('/langganan', 'user.langganan.index')->name('user.langganan');
     Route::post('/token/redeem', [RedeemController::class, 'redeemToken'])->name('redeem.token');
 
+    // Rute Job tetap atau sesuaikan jika perlu
+    Route::view('/job', 'user.job.index')->name('user.job');
+
+    // Rute pendukung lainnya tetap ada di bawah prefix academy atau dipindah
     Route::prefix('academy')->group(function () {
-        Route::get('/', [AcademyController::class, 'index'])->name('user.academy');
-        Route::view('/langganan', 'user.academy.langganan.index')->name('user.academy.langganan');
-        Route::get('/runtutan-belajar', [AcademyController::class, 'runtutanBelajar'])->name('user.academy.runtutan-belajar');
         Route::get('/learning-path/{learning_path}', [LearningPathController::class, 'show'])->name('user.learning-path.show');
     });
     

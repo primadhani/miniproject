@@ -28,40 +28,35 @@ new class extends Component
                 </div>
 
                 <!-- Navigation Links --><div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate class="relative">
-                        {{ __('Home') }}
-                        @if (request()->routeIs('dashboard'))
-                            <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
-                        @endif
-                    </x-nav-link>
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate class="relative">
+                            {{ __('Home') }}
+                            @if (request()->routeIs('dashboard'))
+                                <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
+                            @endif
+                        </x-nav-link>
 
-                    <x-nav-link :href="route('user.academy')" :active="request()->routeIs('user.academy')" wire:navigate class="relative">
-                        {{ __('Academy') }}
-                        @if (request()->routeIs('user.academy'))
-                            <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
-                        @endif
-                    </x-nav-link>
+                        <x-nav-link :href="route('user.proses-belajar')" :active="request()->routeIs('user.proses-belajar')" wire:navigate class="relative">
+                            {{ __('Proses Belajar') }}
+                            @if (request()->routeIs('user.proses-belajar'))
+                                <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
+                            @endif
+                        </x-nav-link>
 
-                    <x-nav-link :href="route('user.quiz')" :active="request()->routeIs('user.quiz')" wire:navigate class="relative">
-                        {{ __('Quiz') }}
-                        @if (request()->routeIs('user.quiz'))
-                            <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
-                        @endif
-                    </x-nav-link>
+                        <x-nav-link :href="route('user.runtutan-belajar')" :active="request()->routeIs('user.runtutan-belajar')" wire:navigate class="relative">
+                            {{ __('Runtutan Belajar') }}
+                            @if (request()->routeIs('user.runtutan-belajar'))
+                                <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
+                            @endif
+                        </x-nav-link>
 
-                    <x-nav-link :href="route('user.event')" :active="request()->routeIs('user.event')" wire:navigate class="relative">
-                        {{ __('Event') }}
-                        @if (request()->routeIs('user.event'))
-                            <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
-                        @endif
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('user.job')" :active="request()->routeIs('user.job')" wire:navigate class="relative">
-                        {{ __('Job') }}
-                        @if (request()->routeIs('user.job'))
-                            <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
-                        @endif
-                    </x-nav-link>
+                        <x-nav-link :href="route('user.langganan')" :active="request()->routeIs('user.langganan')" wire:navigate class="relative">
+                            {{ __('Langganan') }}
+                            @if (request()->routeIs('user.langganan'))
+                                <span class="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600"></span>
+                            @endif
+                        </x-nav-link>
+                    </div>
                 </div>
             </div>
 
@@ -105,40 +100,21 @@ new class extends Component
                 {{ __('Home') }}
             </x-responsive-nav-link>
             
-            <x-responsive-nav-link :href="route('user.academy')" :active="request()->routeIs('user.academy')" wire:navigate>
-                {{ __('Academy') }}
+            <x-responsive-nav-link :href="route('user.proses-belajar')" :active="request()->routeIs('user.proses-belajar')" wire:navigate>
+                {{ __('Proses Belajar') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('user.quiz')" :active="request()->routeIs('user.quiz')" wire:navigate>
-                {{ __('Quiz') }}
+            <x-responsive-nav-link :href="route('user.runtutan-belajar')" :active="request()->routeIs('user.runtutan-belajar')" wire:navigate>
+                {{ __('Runtutan Belajar') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('user.event')" :active="request()->routeIs('user.event')" wire:navigate>
-                {{ __('Event') }}
+            <x-responsive-nav-link :href="route('user.langganan')" :active="request()->routeIs('user.langganan')" wire:navigate>
+                {{ __('Langganan') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('user.job')" :active="request()->routeIs('user.job')" wire:navigate>
                 {{ __('Job') }}
             </x-responsive-nav-link>
-        </div>
-
-        <!-- Responsive Settings Options --><div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication --><button wire:click="logout" class="w-full text-start">
-                    <x-responsive-nav-link>
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </button>
-            </div>
         </div>
     </div>
 </nav>

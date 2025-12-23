@@ -23,7 +23,7 @@
                         Pilih paket langganan dan mulailah perjalanan Anda menjadi developer profesional.
                     </p>
                     {{-- Memastikan tombol mengarah ke rute user.academy.langganan --}}
-                    <a href="{{ route('user.academy.langganan') }}" class="bg-gray-800 hover:bg-gray-900 text-white px-2 py-1 rounded-lg transition w-40 text-sm text-center">
+                    <a href="{{ route('user.langganan') }}" class="bg-gray-800 hover:bg-gray-900 text-white px-2 py-1 rounded-lg transition w-40 text-sm text-center">
                         Langganan
                     </a>
                 </div>
@@ -61,7 +61,10 @@
                         @endif
                     </div>
                 @empty
-                    <p class="text-sm text-gray-500 mt-4">Belum ada Learning Path yang diikuti. Kunjungi <a href="{{ route('user.academy') }}" class="text-blue-500 hover:text-blue-700 font-medium">Akademi</a>.</p>
+                    <p class="text-sm text-gray-500 mt-4">
+                        Belum ada Learning Path yang diikuti. Kunjungi 
+                        <a href="{{ route('user.proses-belajar') }}" class="text-blue-500 hover:text-blue-700 font-medium">Proses Belajar</a>.
+                    </p>
                 @endforelse
                 
             </div>
@@ -81,7 +84,11 @@
                         </li>
                     @empty
                         <li>
-                            <p class="text-sm text-gray-500">Anda belum membuka materi apa pun. Kunjungi <a href="{{ route('user.academy') }}" class="text-blue-500 hover:text-blue-700 font-medium">Akademi</a> untuk memulai.</p>
+                            <p class="text-sm text-gray-500">
+                                Anda belum membuka materi apa pun. Kunjungi 
+                                <a href="{{ route('user.proses-belajar') }}" class="text-blue-500 hover:text-blue-700 font-medium">Proses Belajar</a> 
+                                untuk memulai.
+                            </p>
                         </li>
                     @endforelse
                 </ul>
@@ -94,17 +101,12 @@
         <div class="row">
             {{-- Kolom Kiri: Copyright --}}
             <div class="col-lg-6 mb-2 mb-lg-0 text-center text-lg-left">
-                &copy; 2025 Dicoding Indonesia
+                &copy; 2025 LearnTrack
                 <span class="px-1 text-muted">|</span>
-                Dicoding is a trademark of PT Presentologics.
+                Studi Independen 2025
             </div>
             
-            {{-- Kolom Kanan: Tautan Kebijakan --}}
-            <div class="col-lg-6 text-center text-lg-right">
-                <a href="https://www.dicoding.com/termsofuse" class="dcd-link">Terms</a>
-                <span class="mx-2 text-muted">•</span>
-                <a href="https://www.dicoding.com/privacy" class="dcd-link">Privacy</a>
-            </div>
+            
         </div>
     </footer>
 

@@ -109,22 +109,24 @@ new #[Layout('layouts.guest')] class extends Component
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="mb-3">
-            <button type="submit" class="dcd-btn dcd-btn-primary w-full py-2 font-medium rounded-md font-display text-sm">
-                Daftar
-            </button>
-        </div>
+<div class="mb-4">
+    <button type="submit" 
+            class="dcd-btn dcd-btn-primary w-full py-2 font-medium rounded-md font-display" 
+            style="background-color: #004eb1; border-color: #004eb1;">
+        Daftar
+    </button>
+</div>
 
         <div class="text-center mt-3">
-            <span class="text-sm">Sudah punya akun?</span>
-            <a class="dcd-link font-medium text-sm" href="{{ route('login') }}" wire:navigate>
-                Masuk sekarang
+            Sudah punya akun?
+            <a class="font-medium text-sm" style="color: #004eb1;" href="{{ route('login') }}" wire:navigate>
+                masuk
             </a>
         </div>
 
         <hr class="mt-4 mb-3 border-gray-200">
 
-        <div class="text-center text-xs text-gray-500">
+        {{-- <div class="text-center text-xs text-gray-500">
             <small>
                 Dengan melakukan pendaftaran, Anda setuju dengan <a href="https://www.dicoding.com/termsofuse" class="dcd-link">syarat &amp; ketentuan Dicoding</a>.
             </small>
@@ -134,6 +136,6 @@ new #[Layout('layouts.guest')] class extends Component
                 <a href="https://policies.google.com/privacy" class="dcd-link">Privacy Policy</a> and
                 <a href="https://policies.google.com/terms" class="dcd-link">Terms of Service</a> apply.
             </div>
-        </div>
+        </div> --}}
     </form>
 </div>

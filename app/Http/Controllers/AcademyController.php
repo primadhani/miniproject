@@ -59,7 +59,7 @@ class AcademyController extends Controller
         // Konversi kembali menjadi koleksi terindeks array
         $learningPaths = $learningPathsWithDeadline->values();
 
-        return view('user.academy.progres-belajar.index', compact('learningPaths'));
+        return view('user.progres-belajar.index', compact('learningPaths'));
     }
     
     /**
@@ -163,7 +163,7 @@ class AcademyController extends Controller
             });
         }
         
-        return view('user.academy.runtutan-belajar.index', [
+        return view('user.runtutan-belajar.index', [
             'learningPaths' => $enrolledLearningPaths,
             'recommendedLearningPaths' => $recommendedLearningPaths,
         ]);
