@@ -55,6 +55,6 @@ class RedeemController extends Controller
         // 4. Lakukan proses redeem
         $user->redeemedTokens()->attach($token->id);
 
-        return redirect()->route('user.academy')->with('success', 'Token berhasil di-redeem! Akses Learning Path baru sudah ditambahkan.');
+        return redirect()->route('user.proses-belajar')->with('success', 'Token berhasil di-redeem! Akses Learning Path baru sudah ditambahkan.');
     }
 }
